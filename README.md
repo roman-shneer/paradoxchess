@@ -4,7 +4,7 @@ Using NodeJS
 Installation:
 npx install
 
-Fix include/config.js , passwords to your own. Ports if required.
+Fix include/config.js to change web_port if required, by default its 5000.
 
 node index.php
 
