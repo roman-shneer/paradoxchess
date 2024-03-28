@@ -228,11 +228,9 @@ module.exports = {
     var from_model = this.get_model(game, from, "cube");
 
     if (from_model == null) {
-      //console.log('Bug: missing model from :' + from);
       return { result: false };
     }
     if (game.tour != from_model.uid) {
-      //	console.log('not your tour');
       return { result: false };
     }
     let fw = this.figure_ways[from_model.figure](game, from_model.cube_number);

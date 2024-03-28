@@ -47,7 +47,6 @@ module.exports = {
       select_markers: markers,
     });
     setTimeout(() => {
-      console.log("Bot_Go_prepare");
       this.Bot_Go_action(
         game.tour,
         game,
@@ -158,7 +157,6 @@ module.exports = {
 
   checkFiguresInRiskBefore(game) {
     const riskModels = this.getFiguresInRisk(game);
-    console.log("checkFiguresInRiskBefore");
     if (riskModels.length > 0) {
       for (let r in riskModels) {
         //its risk place
