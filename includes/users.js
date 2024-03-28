@@ -1,5 +1,5 @@
 const crypto = require("crypto");
-var nodemailer = require("nodemailer");
+
 module.exports = {
   the_users: this,
   user_keys: {},
