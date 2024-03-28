@@ -1,0 +1,670 @@
+
+body {
+    margin: 0;
+    padding: 0;
+    background:url("/images/screen2.jpg");
+    background-repeat:no-repeat;
+    background-position: 0 0;
+    background-size: 100% 100%;
+    background-repeat: no-repeat;
+    background-attachment: fixed;
+}
+#best_results, #last_games{
+    vertical-align: top;
+}
+.center{
+    text-align: center;
+}
+.offer{
+    color:red;
+    font-size: 18px;
+}
+.own{
+    position:relative;
+}
+.own:after{
+    content:'';
+    width:20px;
+    height:20px;
+    background: url('/images/v.jpg');
+    display: inline-block;
+    position:absolute;
+    right:0;
+    top:0;
+    background-size:100%;
+    background-repeat: no-repeat;
+}
+.cancel_offer{
+    background:darkred;
+    border:solid white 1px;
+    border-radius: 10px;
+    color:white;
+    float:right;
+}
+#wait_game_box{
+    margin-top:15px;
+}
+.fb-page{
+    
+    margin:0 25px 0 25px;
+    display: inline-block;
+    
+}
+.logo{
+    width: 50px;
+    margin:0 10px;
+	background: white;
+    border-radius: 50%;
+    vertical-align: top;
+}
+
+#connected_users,#active_games{
+    width:60%;
+    margin:10% auto 0 auto;
+    background:white;
+    box-shadow:2px 2px 10px 5px gray;
+}
+#connected_users{
+    width:auto;
+    max-width:20%;
+    position:fixed;
+    right:0;
+    top:30%;
+    padding:10px;
+}
+#active_games{
+    width:auto;
+    max-width:20%;
+    position:fixed;
+    right:0;
+    top:10%;
+    padding:10px;
+    display:none;
+}
+#wait_game_form,#game_form{
+    background: whitesmoke;
+    width:100%;
+    margin:0px auto 0 auto;
+    padding:10px;
+    border-radius: 10px;
+    min-height: 125px;
+    box-shadow: 2px 10px 7px black;
+    z-index: 20;
+}
+#remind_form{
+    background: whitesmoke;
+    width:400px;
+    margin:200px auto 0 auto;
+    padding:10px;
+    border-radius: 10px;
+    min-height: 125px;
+    box-shadow: 2px 10px 7px black;
+    z-index: 20;
+}
+#game_form{
+    position:fixed;
+    top:10%;
+    left:30%;
+    width:400px;
+    margin:0 auto;
+}
+#wait_game_list{
+    background: whitesmoke;
+    width:400px;
+    margin:0px auto 0 auto;
+    border-radius: 10px;
+    padding:10px;
+}
+.main_title{
+    margin:40px 0;
+    padding:0;
+    font-size:70px;
+    color:blanchedalmond;
+    text-align: center;
+    position:fixed;
+    width:100%;
+    top:0;
+    z-index: 10;
+}
+#connected_nonauth{
+    float:right;
+}
+.main_title font{
+    text-shadow: 1px 10px 2px black;
+}
+h5{
+    margin:0;
+    padding:0;
+    font-size:20px;
+    color:whitesmoke;
+    margin:0 auto;
+    text-align: center;
+}
+.form_label{
+    display:inline-block;
+    font-weight:bold;
+    font-size:16px;
+}
+.form_label2{
+    display:block;
+    font-weight:bold;
+    font-size:16px;
+}
+.form_row{
+    margin-top:20px;
+}
+.form_row1{
+    margin-top:40px;
+}
+.games_list{
+    border:solid black 1px;
+}
+.st_col{
+    width:10%;
+}
+#login_form,#register_form,#edit_form{
+    position: absolute;
+    top:20%;
+    left:40%;
+    background: wheat;
+    box-shadow:2px 2px 10px 5px gray;
+    padding:10px;
+    border-radius: 10px;
+}
+#login_form td,#register_form td{
+    vertical-align: top;
+}
+.closex{
+    float:right;
+    cursor: pointer;
+}
+.lets_play{
+    font-size:9px;
+    margin-left:5px;
+    background:forestgreen;
+    color:white;
+    font-weight:bold;
+    border:0;
+    border-radius: 2px;
+    cursor: pointer;
+}
+.personal_game_row{
+    background:gold;
+}
+.apply_btn, #register_game{
+    background: forestgreen;
+    color:white;
+    border-radius: 5px;
+    border:0;
+    padding:3px 5px;
+    cursor: pointer;
+    
+}
+#register_game{
+    padding:5px;	
+    font-size: 18px;
+    font-weight: bold;
+    width:220px;
+}
+.cancel_btn{
+    background: brown;
+    color:white;
+    border-radius: 5px;
+    border:0;
+    padding:3px 5px;
+    cursor: pointer;
+}
+.playing{
+    margin-left:5px;
+    color:red;
+    font-size: 11px;
+}
+#user_name{
+    background: whitesmoke;
+    display:inline-block;
+    border-radius: 10px;
+    box-shadow: 2px 10px 7px black;
+}
+#user_name_box{
+    color:blue;
+    font-weight:bold;
+    cursor:pointer;
+    margin-right:10px;
+    margin-left:10px;
+    display: inline-block;
+}
+#select_avatars{
+    position: fixed;
+    top: 20px;
+    left: 20%;
+    background: wheat;
+    box-shadow:2px 2px 10px 5px gray;
+    z-index:10;
+}
+#select_avatars img{
+    width:100px;
+}
+.avatar{
+    width:50px;
+}
+#exit_session{
+    background: brown;
+    border:0;
+    color:white;
+    cursor: pointer;
+}
+#exit_session,#login_form_btn{
+    vertical-align: top;
+    border-radius: 14px;
+    border:solid black 1px;
+    border:0;
+    background: green;
+    color:white;
+    margin:3px;  
+    font-weight:bold;
+    padding:2px 5px;
+    cursor: pointer;
+    box-shadow: 2px 5px 7px black;
+	text-decoration:none;
+}
+#user{
+    position: fixed;
+    top: 5px;
+    left:0;
+    width:100%;
+    text-align: right;
+}
+.waiting_user{
+    border:solid black 1px;
+    display: inline-block;
+    font-size:8px;
+    text-align: center;
+    box-shadow:1px 1px 5px 1px gray;
+    padding:2px;
+    margin-right: 2px;
+}
+.waiting_user img{
+    width:20px;
+}
+#my_saved_games{
+    color:green;
+    font-weight: bold;
+    cursor: pointer;
+    margin-right:10px;
+    display:block;
+    text-align: right;
+}
+
+.my_game_item{
+    display:block;
+    width:100px;
+    padding:5px;
+    border:Solid black 1px;
+}
+.my_game_item img{
+    width:100px;
+}
+.my_game_delete{
+    background: red;
+    color:white;
+    padding:2px 3px;
+    border-radius: 2px;
+    cursor: pointer;
+    box-shadow:1px 1px 5px 1px gray;
+}
+.form_row_opt{
+    padding:5px;
+    margin:5px;
+    border:solid black 1px;
+    border-radius: 5px;
+    cursor: pointer;
+    display:block;
+    text-align:left;
+}
+.form_row_opt2{
+    padding:5px;
+    margin:5px;
+    border:solid black 1px;
+    border-radius: 5px;
+    cursor: pointer;
+    display: block;
+    height: 50px;
+}
+.form_row_opt2 img{
+    float: left;
+    margin-right:20px;
+}
+.form_row_opt3{
+    border:solid black 1px;
+    border-radius: 5px;
+    cursor: pointer;
+    display: inline-block;
+    height: 150px;
+    width: 45%;   
+    margin: 1%;
+    padding: 1%;
+    text-align: center;
+    color:white;
+    background: black;
+}
+.form_row_opt3 img{
+    height:110px;
+    max-height:auto;
+    margin:0 auto;
+    display:block;
+}
+.selected_form_row{
+    background: green;
+}
+.avatar_main{
+    float:left;
+}
+.under_avatar{
+    float:right;
+    text-align:left;
+    padding-left:5px;
+}
+#status_table{
+    
+    background:transparent;
+    color:white;
+    padding:10px;
+    position: fixed;
+    bottom:0;
+    width:96%
+}
+.play_game_btn, .play_siglegame_btn{
+    background: green;
+    border-radius: 10px;
+    padding:5px;
+    font-size:25px;
+    color:white;
+    box-shadow:2px 2px 4px 0 gray;
+    border:0;
+    cursor: pointer;
+}
+.play_siglegame_btn{
+    float:right;
+}
+#register_game_back{
+    background: brown;
+    color:cornsilk;
+    float:right;
+    border-radius: 5px;
+    border:0;
+    padding:5px;
+}
+.error{
+    color:red;
+    font-weight: bold;
+    text-align: center;
+}
+.guide_link{
+    margin-top: 10px;
+    font-weight: bold;
+    font-size: 20px;
+    display: inline-block;
+    text-decoration: none;
+}
+#left_menu{
+    position:fixed;
+    left:0;
+    top:25%;
+    z-index: 20;
+}
+#left_menu a{
+    display: block;
+    font-size:20px;
+    font-weight: bold;
+    text-decoration: none;
+    background: white;
+    color:green;
+    margin:0 0 10px 10px;
+    padding:10px;
+    border-radius: 10px;
+    border:solid black 1px;
+    box-shadow: 2px 10px 7px black;
+}
+#left_menu a:hover{
+    color:lime;
+}
+#menu_toggle{
+    position: fixed;
+    top:0;
+    left:0;
+    width:50px;
+    height:50px;
+    display:none;
+}
+#remind_password_btn{
+    float:right;
+}
+.btn{
+    background-color: green;
+    color:whitesmoke;
+    border:0;
+    border-radius: 5px;
+    padding: 5px;
+    cursor: pointer;
+}
+#remind_password_btn,#login_btn,#register_open_btn,#register_btn{
+    background-color: brown;
+    color:whitesmoke;
+    border:0;
+    border-radius: 10px;
+    padding: 3px 5px;
+    cursor: pointer;
+    width:100%;
+}
+#login_btn,#register_open_btn,#register_btn{
+    background-color: green;   
+    
+}
+.no_users{
+    color:red;
+    font-weight: bold;
+    font-size: 20px;
+}
+.l1{color:blue;}
+.l2{color:lightskyblue;}
+.l3{color:green;}
+.l4{color:yellow;}
+.l5{color:orange;}
+.l6{color:brown;}
+.l7{color:purple;}
+#fb_login_btn{
+    max-width:120px;
+    margin:100px auto 0 auto;
+    display: block;
+    cursor: pointer;
+}
+.scrollable{
+    position: absolute;
+    z-index: 20;
+    left: calc(50% - 300px);
+    top:150px;
+    padding-bottom:50px;
+    max-width:600px;
+}
+
+
+.back{
+    position: fixed;
+    top:0;
+    left:0;
+    display: inline-block;
+    background: white;
+    padding: 5px 10px;
+    border-radius: 0 0 40% 0;
+    color:black;
+    text-decoration: none;
+    font-weight: bold;
+}
+.info{
+    background: white;
+    padding: 5px 10px;
+    border-radius: 10px;
+    color:black;
+    width:60%;
+    margin:0 auto 20px auto;
+}
+.info p{
+    border:dashed silver 1px;
+    padding:10px;
+    border-radius: 10px;
+    font-size:18px;
+    font-family: Arial, Helvetica, sans-serif;
+}
+.h1{
+    padding: 0;
+    font-size: 30px;
+    margin: 25px 0 10px 0;
+    text-align: center;
+    color: whitesmoke;
+    
+}
+.h2{
+    padding:0;
+    margin:0;
+    font-size:20px;
+    text-align: center;
+}
+.row{
+   
+    margin-bottom: 20px;
+    border:dashed silver 1px;
+    padding:10px;
+    border-radius: 10px;
+    font-size:18px;
+    font-family: Arial, Helvetica, sans-serif;
+}
+.row img{
+    margin:10px auto;
+    max-width: 100%;
+    display:block;
+}
+
+.mw100{
+    max-width: 100%;
+}
+#last_games{
+    font-size:14px;
+}
+@media only screen and (max-width: 800px) {
+.play_siglegame_btn{
+    float:none;
+    margin-top:20px;
+    display: block;
+}    
+.form_row_opt3{
+    height:120px;
+    font-size:11px;
+}    
+.form_row_opt3 img{
+ height:90px;
+ width:auto;
+}
+.info{
+    width:calc(100% - 40px);
+}    
+.hide_on_mobile{
+    display: none;
+}    
+.scrollable{
+    max-width:100%;
+    left:0;
+}
+body{
+    background-size:auto 100%;
+}
+#wait_game_box{
+    left:0;
+    width:100%;
+}
+.main_title{
+    font-size:200%;
+    margin:15% 0 5% 0;
+    width:100%;
+}
+#left_menu{
+    top:50px;
+    display:none;
+}
+.menu_open{
+    display:block!important;
+}
+#menu_toggle{
+    display:inline-block;
+    line-height: 150%;
+    padding:0 10px;
+    color:white;
+    font-size: 140%;
+    font-weight: bold;
+    text-decoration: none;
+    background-color: green;
+    width:auto!important;
+    height:40px;
+    border:solid black 1px;
+    border-radius: 14px;
+    margin:3px;
+}
+#wait_game_form,#game_form{
+    width:calc(100% - 40px);
+    min-height:130px;
+    margin:0 10px;
+    box-shadow: 2px 10px 7px black;
+    left:auto;
+    
+}
+#wait_game_list{
+    width:90%;
+}
+#game_form{
+    margin: 2% 2%;
+    top: 0;
+    position: fixed;
+    width: 90%;
+    height: 93%;
+    z-index: 1;
+    left: 0;
+    border-radius: 2%;
+}
+#login_form,#register_form,#edit_form{
+    top:5%;
+    left:5%;
+	width:90%;
+	height:90%;
+}
+#login_form table{
+	width:100%;
+}
+#login_email,#login_password{
+	font-size:150%;
+	width:100%;
+	font-weight: bolder;
+}
+#login_btn, #register_open_btn, #register_btn,#remind_password_btn,#remind_email,#register_email,#register_name,#register_password,#register_password2,#register_btn,#change_avatar{
+	font-size: 120%;
+	width:100%;
+}
+#login_btn,#register_open_btn{
+    margin-bottom: 40px;
+}
+#fb_login_btn{
+	width:100%;
+}
+#exit_session,#login_form_btn{
+    font-size:90%;
+    
+}
+#select_avatars{
+    width:calc(100% - 40px);
+    top: 20px;
+    left: 20px;
+    background: wheat;
+    box-shadow:2px 2px 10px 5px gray;
+}
+#select_avatars img{
+	width:100%;
+}
+}

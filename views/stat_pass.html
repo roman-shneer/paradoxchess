@@ -1,0 +1,56 @@
+<!DOCTYPE html>
+<html>
+  <head>
+
+	<script src="/scripts/react.production.min.js" crossorigin></script>
+    <script src="/scripts/react-dom.production.min.js" crossorigin></script>
+	<link rel="stylesheet" href="//code.jquery.com/ui/1.12.1/themes/base/jquery-ui.css">	
+	<script src="https://code.jquery.com/jquery-1.12.4.js"></script>
+	<script src="https://code.jquery.com/ui/1.12.1/jquery-ui.js"></script>
+    <style>
+        .stat_div{
+            border:solid red 1px;
+            text-align: center;
+        }
+        .stat_column{
+            border:solid black 1px;
+            display: inline-block;
+            width: 25%;
+        }
+    </style>
+  </head>
+  <body>
+ 
+  <div class="stat_div">
+      <h1>Login</h1>
+      <div id="login_form"></div>  
+  </div>
+  <script type="module">
+    'use strict';
+    class login_form extends React.Component {
+    constructor(props) {
+        super(props);
+        this.state = {  };
+      
+    }
+    render() {
+        return e(
+            'form',
+            {'action':'','method':'POST'},
+            e('div', null,
+                e('label',null,'Code1'),
+                e('input',{'name':"code1",'type':'text'}),
+                e('label',null,'Code2'),
+                e('input',{'name':"code2",'type':'text'}),
+                e('input',{'type':'submit','value':'Login'}),
+            )
+        )
+
+    }
+}
+const e = React.createElement;
+const r = ReactDOM.render;
+r(e(login_form), document.querySelector('#login_form'));
+  </script>
+  </body>
+</html>  

@@ -1,0 +1,280 @@
+<!DOCTYPE html>
+<html>
+  <head>
+
+	<script src="/scripts/react.production.min.js" crossorigin></script>
+    <script src="/scripts/react-dom.production.min.js" crossorigin></script>
+	<link rel="stylesheet" href="//code.jquery.com/ui/1.12.1/themes/base/jquery-ui.css">	
+	<script src="https://code.jquery.com/jquery-1.12.4.js"></script>
+    <script src="https://code.jquery.com/ui/1.12.1/jquery-ui.js"></script>
+    <script type="text/javascript" src="https://www.gstatic.com/charts/loader.js"></script>
+    <script type="text/javascript">
+      google.charts.load('current', {'packages':['corechart']});
+      google.charts.setOnLoadCallback(drawChart);
+      //var timeline_chart;  
+      var timeline_chart_options = {
+          title: 'Timeline',
+          selectionMode: 'multiple',
+          aggregationTarget: 'category',
+          hAxis: {title: 'Hour',  titleTextStyle: {color: '#333'}},
+          vAxis: {minValue: 0}
+        };
+      function drawChart() {
+        //var data = google.visualization.arrayToDataTable([]);
+
+        timeline_chart = new google.visualization.AreaChart(document.getElementById('timeline'));
+        timeline_cpu_chart = new google.visualization.AreaChart(document.getElementById('timeline_cpu'));
+        timeline_memory_chart = new google.visualization.AreaChart(document.getElementById('timeline_memory'));
+        //timeline_chart.draw(data, timeline_chart_options);
+      }
+    </script>		
+    <style>
+      
+        .stat_column{
+            border:solid silver 1px;
+            display: inline-block;
+            width: 24%;
+        }
+        #usersConnected{
+          border:solid black 1px;
+          max-height:400px;
+          overflow: auto;
+        }
+        #usersConnected .table{
+          display:table;
+          width:100%;
+        }
+        #usersConnected .tr{
+          display: table-row;
+        }
+        #usersConnected .tr span{
+          display: table-cell;
+        }
+    </style>
+  </head>
+  <body>
+  <div class="stat_div" id="now"></div>
+  <div class="stat_div" id="usersConnected"></div>
+  <div>
+    <label for="from">From</label>
+    <input type="text" id="from" name="from">
+    <label for="to">to</label>
+    <input type="text" id="to" name="to">
+    <input type="button" id="new_time" value="CHANGE">
+  </div>
+  <div class="stat_div" id="timeline"></div>
+  <div class="stat_div" id="timeline_cpu"></div>
+  <div class="stat_div" id="timeline_memory"></div>
+  <script type="module">
+
+'use strict'; 
+$( document ).ready(function() {
+const r = ReactDOM.render;      
+const e = React.createElement;
+
+var UI={
+  
+    timeline_update:function (timeline){
+       
+        if(typeof google.visualization!='undefined'){
+        var tdata=[['Hour','connected','logined','playing','games','multigames']];
+        var tdata_cpu=[['Hour','cpu']];
+        var tdata_memory=[['Hour','memory']];
+       
+            for(var t in timeline)
+            {
+                var data=JSON.parse(timeline[t].data);
+                var date = new Date(timeline[t].linux_hour*3600*1000);
+                 
+                tdata.push([date.getHours()+':00 '+date.getDate()+'/'+(date.getMonth()+1),
+                            (typeof data.connected!='undefined')?data.connected:0,
+                            (typeof data.logined!='undefined')?data.logined:0,
+                            (typeof data.playing!='undefined')?data.playing:0,
+                            (typeof data.games!='undefined')?data.games:0,
+                            (typeof data.multi_games!='undefined')?data.multi_games:0,
+                            ]);
+                tdata_cpu.push([date.getHours()+':00 '+date.getDate()+'/'+(date.getMonth()+1), 
+                            (typeof data.cpu_used!='undefined')?data.cpu_used:0
+                            ]);      
+                tdata_memory.push([date.getHours()+':00 '+date.getDate()+'/'+(date.getMonth()+1), 
+                            (typeof data.memory_usage!='undefined')?data.memory_usage:0,
+                            ]);                     
+            }
+          
+            var data = google.visualization.arrayToDataTable(tdata);
+            var data_cpu = google.visualization.arrayToDataTable(tdata_cpu);
+            var data_memory = google.visualization.arrayToDataTable(tdata_memory);
+            
+        
+            if(typeof timeline_chart!='undefined'){
+              
+              timeline_chart.draw(data, timeline_chart_options);
+            }
+            if(typeof timeline_cpu_chart!='undefined')timeline_cpu_chart.draw(data_cpu, timeline_chart_options);
+            if(typeof timeline_memory_chart!='undefined')timeline_memory_chart.draw(data_memory, timeline_chart_options);
+        }   
+       
+    }
+};     
+class usersConnected extends React.Component {
+  constructor(props) {
+        super(props);
+        this.state = {'users':[]};
+        UI.usersConnected=this;
+    }
+    chg(data) {
+      if(data.users!=this.state.users){
+        this.state.users=data.users;
+        this.setState(this.state);
+      }
+    }
+    render (){
+      var users=[];
+      for(var u in this.state.users)
+      {
+        var date=new Date(this.state.users[u].time*1000);
+        users.push(e('div',{'class':'tr'},
+                    
+                    e('span',{'title':'Last Visit'},date.getHours()+':00 '+date.getDate()+'/'+(date.getMonth()+1)),
+                    e('span',{'title':'ip'},'IP:'+this.state.users[u].ip),
+                    e('span',{'title':'role'},'USER: ('+this.state.users[u].data.role+') '+this.state.users[u].data.userName),
+                    e('span',{'title':'email'},this.state.users[u].data.email),
+                    e('span',{'title':'total score'},this.state.users[u].data.score),
+                    e('span',{'title':'Win games'},this.state.users[u].data.win_games),
+                    ));
+      }
+      return e('div',{'class':'table'},e('h5',{'class':'stat_label'},"Users Connected:",),users);
+    }
+}
+class now extends React.Component {
+    constructor(props) {
+        super(props);
+        this.state = {'now_connected':0,'now_playing':0,'now_games':0,'memory_used':0,'now_logined':0,'now_guests':0,'now_games_multy':0,'cpu_used':0};
+        UI.now=this;
+    }
+    chg(stat) {
+        var save=false;
+        var opts=Object.keys(this.state);
+        for(var o in opts)
+        {
+            if(stat[opts[o]]!=this.state[opts[o]]){
+                this.state[opts[o]]=stat[opts[o]];
+                save=true;
+            }
+        }
+    
+        if(save)
+           this.setState(this.state);
+    }
+    render() {
+        
+        return e('div', null, 
+            e('label',{'class':'stat_label'},"Now:"),
+            e('div',{'class':'stat_column'},
+                e('font',null,'Connected:'),
+                e('b',{'id':'now_connected'},this.state.now_connected),
+                e('font',null,'(Logined:'),
+                e('b',{'id':'now_logined'},this.state.now_logined),
+                e('font',null,' Guests:'),
+                e('b',{'id':'now_guests'},this.state.now_guests),
+                e('font',null,')'),
+            ),
+            //e('div',{'class':'stat_column'},e('font',null,'UsersConnected:'),),
+            e('div',{'class':'stat_column'},
+                e('font',null,'Playing:'),
+                e('b',{'id':'now_playing'},this.state.now_playing),
+            ),
+            e('div',{'class':'stat_column'},
+                e('font',null,'Games:'),
+                e('b',{'id':'now_games'},this.state.now_games),
+                e('font',null,'(Network games:'+this.state.now_games_multy+')'),
+
+                
+            ),
+            e('div',{'class':'stat_column'},
+                e('font',null,'Memory Usage:'),
+                e('b',{'id':'memory_used'},this.state.memory_used+'Mb'),
+                e('span',{'style':{'float':'right'}},e('font',null,'CPU Usage:'),e('b',{'id':'memory_used'},this.state.cpu_used+'Mb'),)
+                
+            ),
+        );
+    }
+}      
+
+
+
+	
+
+    // Create WebSocket connection.
+    window.socket = new WebSocket((location.hostname=='localhost')?'ws://localhost:8888/?stat':'wss://krakova.com:8888/?stat');
+    // Connection opened
+    window.socket.addEventListener('open', function (event) {
+        r(e(now), document.querySelector('#now'));
+        r(e(usersConnected), document.querySelector('#usersConnected'));
+        //window.socket.send(JSON.stringify({'page':'stat'}));
+        // Listen for messages
+        window.socket.addEventListener('message', function (event) {
+            var data=JSON.parse(event.data);
+            console.log(data);
+            if($('#from').val()=='')
+            {
+              var stat_from=new Date(data.stat_from*1000);
+              $('#from').val((stat_from.getMonth()+1)+'/'+stat_from.getDate()+'/'+stat_from.getFullYear()+' ');
+            }
+            if($('#to').val()=='')
+            {
+              var stat_at=new Date(data.stat_at*1000);
+              $('#to').val((stat_at.getMonth()+1)+'/'+stat_at.getDate()+'/'+stat_at.getFullYear());
+            }
+            UI.now.chg(data);
+            UI.timeline_update(data.last_stats);
+            UI.usersConnected.chg(data);
+        });
+    });
+
+    //datepicker
+    var dateFormat = "mm/dd/yy",
+      from = $( "#from" )
+        .datepicker({
+          defaultDate: "+1w",
+          changeMonth: true,
+          numberOfMonths: 1
+        })
+        .on( "change", function() {
+          to.datepicker( "option", "minDate", getDate( this ) );
+        }),
+      to = $( "#to" ).datepicker({
+        defaultDate: "today",
+        changeMonth: true,
+        numberOfMonths: 1
+      })
+      .on( "change", function() {
+        from.datepicker( "option", "maxDate", getDate( this ) );
+      });
+ 
+    function getDate( element ) {
+      var date;
+      try {
+        date = $.datepicker.parseDate( dateFormat, element.value );
+      } catch( error ) {
+        date = null;
+      }
+ 
+      return date;
+    }
+    $('#new_time').click(function (){
+            var args={};
+            args.page = 'stat';
+            args.stat_from=$('#from').val();
+            args.stat_to=$('#to').val();
+            args.action='change_time';
+            //args.mdkey = window.mdkey;
+
+            window.socket.send(JSON.stringify(args));
+    });
+    //datepicker end
+
+});
+  </script>
+  </body>
+</html>  

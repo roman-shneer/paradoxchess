@@ -1,0 +1,67 @@
+
+#last_games table, #best_results table{
+    padding: 5px 10px;
+    background: white;
+    border-radius: 10px;
+}
+.info p{
+    border:dashed silver 1px;
+    padding:10px;
+    border-radius: 10px;
+    font-size:18px;
+    font-family: Arial, Helvetica, sans-serif;
+}
+
+.h2{
+    padding:0;
+    margin:0;
+    font-size:20px;
+    text-align: center;
+    color:white;
+}
+
+.row img{
+    margin:0 10px 10px 10px;
+}
+#best_results{
+    vertical-align: top;
+}
+.gd{
+    display:inline-block;
+    width:40px;
+    height:60px;
+    background-attachment:initial!important;
+    background-size: 100%!important;
+    position: relative;
+    background-position: 0 0 !important;
+    vertical-align:top;
+    text-align: center;
+}
+.gd_name{
+   position: absolute;
+   bottom:0; 
+   font-size:12px;
+}
+.loser{
+    background:url("/images/removed.svg");
+    background-size:100% 100%;
+    fill: red;
+}
+@media only screen and (max-width: 600px) {
+ .h1{font-size:20px;margin-top:40px;}
+ .info{
+ width:90%;
+ }
+ .info #last_games,.info #best_results{
+    display:block;
+ }
+ 
+ .row,.row img{
+    display:block;
+ }
+}
+@media only screen and (max-width: 600px) {
+    #last_games table, #best_results table{
+        width:100%;
+    }
+}
