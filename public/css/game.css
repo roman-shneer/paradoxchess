@@ -57,14 +57,6 @@ top:50%;
 .color_red{
 	background:red!important;
 }
-.sandclock{
-	position: absolute;
-    margin:22px auto 0 10px;
-}
-.tour_player .sandclock{
-transform:rotate(-45deg);
-  animation: blinker 1s linear infinite;
-}
 
 @keyframes blinker {
   50% {
