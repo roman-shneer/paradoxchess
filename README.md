@@ -2,7 +2,7 @@ Paradox Chess - its experimental online game based on chess, in multidimensional
 Using NodeJS
 
 Installation:
-npx install
+npm install
 
 Fix include/config.js to change web_port if required, by default its 5000.
 
