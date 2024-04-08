@@ -2,7 +2,9 @@
 
 
 Paradox Chess - its experimental online game based on chess, in multidimensional space.
-Using NodeJS
+Using NodeJS, threeJS
+![screen3](https://github.com/shaman33/paradoxchess/assets/313599/2bc0e4b3-82a2-4c7f-a196-1e611db2475e)
+
 
 Installation:
 npm install
