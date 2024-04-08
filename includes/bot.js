@@ -1,6 +1,7 @@
 module.exports = {
   glob: null,
-  Bot_Go2: function (game, game_id) {
+
+  botAction: function (game, game_id) {
     let my_figures = [];
     let myModels = this.glob.tools.getMyModels(game);
     for (let id in myModels) {
@@ -19,7 +20,7 @@ module.exports = {
       });
 
       let bestWay = my_figures[0];
-      this.Bot_Go_prepare(game, bestWay[0], bestWay[1]);
+      this.prepareAction(game, bestWay[0], bestWay[1]);
     } else {
       //bad way
       console.log("Im Lose!");
@@ -32,7 +33,7 @@ module.exports = {
     let otherModels = this.glob.tools.getOtherModels(game);
     let riskFiguresPrice = 0;
     for (let id in otherModels) {
-      var fw = this.glob.tools.figure_ways[otherModels[id].figure](
+      var fw = this.glob.tools.figureWays[otherModels[id].figure](
         game,
         otherModels[id].cube_number
       );
@@ -40,25 +41,20 @@ module.exports = {
     }
     return true;
   },
-  Bot_Go_prepare(game, my_model, cell) {
+
+  prepareAction(game, my_model, cell) {
     var markers = this.glob.tools.selectfiguremarkers(game, my_model);
     this.glob.the_users.sendToGameClients(game, {
       action: "select_figure",
       select_markers: markers,
     });
     setTimeout(() => {
-      this.Bot_Go_action(
-        game.tour,
-        game,
-        game.game_id,
-        my_model.cube_number,
-        cell
-      );
+      this.executeAction(game, my_model.cube_number, cell);
     }, 1000);
   },
 
   botCheckPaths(my_figures, game, model) {
-    var ways = this.glob.tools.figure_ways[model.figure](
+    const ways = this.glob.tools.figureWays[model.figure](
       game,
       model.cube_number
     );
@@ -72,7 +68,7 @@ module.exports = {
         perm.result == true &&
         this.checkMoveRisk(game, model.id, ways.war[w])
       ) {
-        let targetModel = this.glob.tools.get_model(game, ways.war[w], "cube");
+        let targetModel = this.glob.tools.getModel(game, ways.war[w], "cube");
         if (targetModel != null) {
           my_figures.push([model, ways.war[w], targetModel.price, "war"]);
         }
@@ -92,6 +88,7 @@ module.exports = {
       }
     }
   },
+
   checkMoveRisk(game, fromModeId, cube) {
     let new_game = this.glob.tools.checkRiskiness(game, cube, fromModeId);
     const riskFiguresNow = this.getFiguresInRisk(game);
@@ -104,7 +101,7 @@ module.exports = {
     for (let r in riskFiguresAfter) {
       riskPriceAfter += riskFiguresAfter[r].price;
     }
-    let targetModel = this.glob.tools.get_model(game, cube, "cube");
+    let targetModel = this.glob.tools.getModel(game, cube, "cube");
     if ((targetModel = null)) {
       riskPriceAfter += targetModel.price;
     }
@@ -123,7 +120,7 @@ module.exports = {
     }
     let otherModels = this.glob.tools.getOtherModels(game);
     for (let m in otherModels) {
-      let otherWays = this.glob.tools.figure_ways[otherModels[m].figure](
+      let otherWays = this.glob.tools.figureWays[otherModels[m].figure](
         game,
         otherModels[m].cube_number
       );
@@ -184,7 +181,7 @@ module.exports = {
                 mGuards[g].cube_number
               );
               if (perm.result == true) {
-                this.Bot_Go_prepare(
+                this.prepareAction(
                   game,
                   mGuards[g],
                   riskModels[r][1].cube_number
@@ -219,7 +216,7 @@ module.exports = {
                 markers[m].cube_number
               );
               if (perm.result) {
-                this.Bot_Go_prepare(
+                this.prepareAction(
                   game,
                   riskModels[r][0],
                   markers[m].cube_number
@@ -233,6 +230,7 @@ module.exports = {
     }
     return false;
   },
+
   priceSort(models, bigger) {
     if (bigger) {
       models.sort((a, b) => {
@@ -257,6 +255,7 @@ module.exports = {
     }
     return models;
   },
+
   botGetCellGuardsPrice(game, cell, exclude_model_id) {
     let guardFigures = [];
     let guardFiguresCount = 0;
@@ -264,7 +263,7 @@ module.exports = {
     for (let id in myModels) {
       let model = myModels[id];
       if (model.id != exclude_model_id) {
-        let ways = this.glob.tools.figure_ways[model.figure](
+        let ways = this.glob.tools.figureWays[model.figure](
           game,
           model.cube_number
         );
@@ -277,7 +276,7 @@ module.exports = {
     return { models: guardFigures, price: guardFiguresCount };
   },
 
-  Bot_Go_action: function (user_id, game, game_id, active_cube, action_cube) {
+  executeAction: function (game, active_cube, action_cube) {
     var move_res = this.glob.tools.move(active_cube, action_cube, game);
     if (move_res.result == true) {
       this.glob.tools.checkGameStatus(game);

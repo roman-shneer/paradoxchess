@@ -5,17 +5,17 @@ module.exports = {
   games: {},
   dead_games_list: {},
   //saved_games_list: {},
-  if_cell_empty: function (game, d) {
-    var model = tools.get_model(game, d, "cube");
+  ifCellEmpty: function (game, d) {
+    var model = tools.getModel(game, d, "cube");
     if (model != null) return true;
     else return false;
   },
 
-  if_world_limit: function (d, game) {
+  ifWorldLimit: function (d, game) {
     return game.data.world.includes(d);
   },
 
-  get_pawn_perpend_ways: function (game, cube_number, limit) {
+  getPawnPerpendWays: function (game, cube_number, limit) {
     //var tools=this;
     var d = cube_number.split(":");
     var x = parseInt(d[0]);
@@ -27,7 +27,7 @@ module.exports = {
     const add2 = function (x, y, z) {
       var d = [x, y, z].join(":");
 
-      if (tools.if_world_limit(d, game) == false) return true;
+      if (tools.ifWorldLimit(d, game) == false) return true;
       result.push(d);
       return true;
     };
@@ -155,11 +155,10 @@ module.exports = {
         }
       }
     }
-    console.log(cube_number, dir, result);
     return result;
   },
 
-  get_perpend_ways: function (game, cube_number, limit) {
+  getPerpendWays: function (game, cube_number, limit) {
     //var tools=this;
     var d = cube_number.split(":");
     var x = parseInt(d[0]);
@@ -172,7 +171,7 @@ module.exports = {
       var add2 = function (x, y, z) {
         var d = [x, y, z].join(":");
 
-        if (tools.if_world_limit(d, game) == false) return true;
+        if (tools.ifWorldLimit(d, game) == false) return true;
         result.push(d);
         return true;
       };
@@ -180,10 +179,10 @@ module.exports = {
       var add2 = function (x, y, z) {
         var d = [x, y, z].join(":");
 
-        if (tools.if_world_limit(d, game) == false) return true;
+        if (tools.ifWorldLimit(d, game) == false) return true;
         result.push(d);
 
-        if (tools.if_cell_empty(game, d)) return true;
+        if (tools.ifCellEmpty(game, d)) return true;
         else return false;
       };
     }
@@ -229,7 +228,7 @@ module.exports = {
     return result;
   },
 
-  get_pawn_direct_ways: function (game, cube_number, limit) {
+  getPawnDirectWays: function (game, cube_number, limit) {
     //tools=this;
     var d = cube_number.split(":");
     var x = parseInt(d[0]);
@@ -239,7 +238,7 @@ module.exports = {
     var result = [];
     var add_func = function (x, y, z) {
       var d = [x, y, z].join(":");
-      if (tools.if_world_limit(d, game) == false) return true;
+      if (tools.ifWorldLimit(d, game) == false) return true;
       result.push(d);
       return true;
     };
@@ -289,19 +288,19 @@ module.exports = {
     return result;
   },
 
-  get_direct_ways: function (game, cube_number, limit) {
+  getDirectWays: function (game, cube_number, limit) {
     //tools=this;
     var d = cube_number.split(":");
     var x = parseInt(d[0]);
     var y = parseInt(d[1]);
     var z = parseInt(d[2]);
-    var result = [];
+    const result = [];
 
     if (typeof limit != "undefined") {
       //limited to one cell
       var add_func = function (x, y, z) {
         var d = [x, y, z].join(":");
-        if (tools.if_world_limit(d, game) == false) return true;
+        if (tools.ifWorldLimit(d, game) == false) return true;
         result.push(d);
         return true;
       };
@@ -310,10 +309,10 @@ module.exports = {
       var add_func = function (x, y, z) {
         var d = [x, y, z].join(":");
 
-        if (tools.if_world_limit(d, game) == false) return true;
+        if (tools.ifWorldLimit(d, game) == false) return true;
         result.push(d);
 
-        if (tools.if_cell_empty(game, d)) return true;
+        if (tools.ifCellEmpty(game, d)) return true;
         else return false;
       };
     }
@@ -334,26 +333,25 @@ module.exports = {
     return result;
   },
 
-  figure_ways: {
+  figureWays: {
     pawn: function (game, cube_number) {
       //potencial ways
-      console.log("figure_ways", game.dirs, game.tour, game.dirs[game.tour]);
-      var ways_direct = tools.get_pawn_direct_ways(game, cube_number, true);
-      var ways_per = tools.get_pawn_perpend_ways(game, cube_number, true);
+      var ways_direct = tools.getPawnDirectWays(game, cube_number, true);
+      var ways_per = tools.getPawnPerpendWays(game, cube_number, true);
 
       return { move: ways_direct, war: ways_per };
     },
 
     king: function (game, cube_number) {
       //potencial ways
-      var ways_direct = tools.get_direct_ways(game, cube_number, true);
-      var ways_per = tools.get_perpend_ways(game, cube_number, true);
+      var ways_direct = tools.getDirectWays(game, cube_number, true);
+      var ways_per = tools.getPerpendWays(game, cube_number, true);
       ways_direct = ways_direct.concat(ways_per);
       return { move: ways_direct, war: ways_direct };
     },
     queen: function (game, cube_number) {
-      var ways_direct = tools.get_direct_ways(game, cube_number);
-      var ways_per = tools.get_perpend_ways(game, cube_number);
+      var ways_direct = tools.getDirectWays(game, cube_number);
+      var ways_per = tools.getPerpendWays(game, cube_number);
       ways_direct = ways_direct.concat(ways_per);
       return { move: ways_direct, war: ways_direct };
     },
@@ -366,9 +364,9 @@ module.exports = {
       var result = { move: [], war: [] };
       var add2 = function (x, y, z) {
         var d = [x, y, z].join(":");
-        //tools.if_cell_empty(game,d)
-        if (tools.if_world_limit(d, game) == true) {
-          //if(tools.if_cell_empty(game.data.world[d]))	{
+        //tools.ifCellEmpty(game,d)
+        if (tools.ifWorldLimit(d, game) == true) {
+          //if(tools.ifCellEmpty(game.data.world[d]))	{
           result.move.push(d);
         }
       };
@@ -404,16 +402,16 @@ module.exports = {
       return result;
     },
     elephant: function (game, cube_number) {
-      var ways = tools.get_perpend_ways(game, cube_number);
+      var ways = tools.getPerpendWays(game, cube_number);
       return { move: ways, war: ways };
     },
     castle: function (game, cube_number) {
-      var ways = tools.get_direct_ways(game, cube_number);
+      var ways = tools.getDirectWays(game, cube_number);
       return { move: ways, war: ways };
     },
   },
 
-  get_model: function (game, it, what) {
+  getModel: function (game, it, what) {
     for (let m in game.data.models) {
       if (what == "cube" && game.data.models[m].cube_number == it)
         return game.data.models[m];
@@ -432,8 +430,8 @@ module.exports = {
   },
 
   chkMovePermission(game, to, from) {
-    var to_model = this.get_model(game, to, "cube");
-    var from_model = this.get_model(game, from, "cube");
+    var to_model = this.getModel(game, to, "cube");
+    var from_model = this.getModel(game, from, "cube");
 
     if (from_model == null) {
       return { result: false };
@@ -441,7 +439,7 @@ module.exports = {
     if (game.tour != from_model.uid) {
       return { result: false };
     }
-    let fw = this.figure_ways[from_model.figure](game, from_model.cube_number);
+    let fw = this.figureWays[from_model.figure](game, from_model.cube_number);
     if (to_model != null) {
       //attack
       if (
@@ -472,8 +470,8 @@ module.exports = {
     var permission = this.chkMovePermission(game, to, from);
 
     if (permission.result == true) {
-      var from_model = this.get_model(game, from, "cube");
-      var to_model = this.get_model(game, to, "cube");
+      var from_model = this.getModel(game, from, "cube");
+      var to_model = this.getModel(game, to, "cube");
       from_model.cube_number = to;
       var kill_model = 0;
       if (to_model != null) {
@@ -596,7 +594,7 @@ module.exports = {
       this.games[game_uniq_id].users,
       this.games[game_uniq_id].cube_size
     );
-    console.log("startSingleGame", this.games[game_uniq_id]);
+
     delete wgl;
     this.glob.the_users.sendToStartClients();
   },
@@ -719,7 +717,7 @@ module.exports = {
     }
     let result = { result: true, figure: "" };
     for (let e in enemy) {
-      var fw = this.figure_ways[enemy[e].figure](game, enemy[e].cube_number);
+      var fw = this.figureWays[enemy[e].figure](game, enemy[e].cube_number);
       //SHAH!
       if (fw.war.includes(my_king)) {
         result = { result: false, figure: enemy[e].figure };
@@ -730,7 +728,7 @@ module.exports = {
   },
   checkRiskiness: function (game, cube_number, model_id) {
     var new_game = JSON.parse(JSON.stringify(game));
-    var dest_model = this.get_model(new_game, cube_number, "cube");
+    var dest_model = this.getModel(new_game, cube_number, "cube");
 
     if (new_game.data.models[model_id] == null) return []; //if unknown
     new_game.tour = this.nextTour(game.tour, game.users);
@@ -747,10 +745,7 @@ module.exports = {
     let my_fig = this.getMyModels(game, uid);
     for (let cn in my_fig) {
       //if (my_fig[cn].cube_number != 0) {
-      let fw = this.figure_ways[my_fig[cn].figure](
-        game,
-        my_fig[cn].cube_number
-      );
+      let fw = this.figureWays[my_fig[cn].figure](game, my_fig[cn].cube_number);
 
       for (let m in fw.war) {
         let new_game = this.checkRiskiness(game, fw.war[m], my_fig[cn].id);
@@ -890,7 +885,7 @@ module.exports = {
       for (let y = mins[1]; y <= maxs[1]; y++) {
         let cubeMin = this.getCubeExts(cubesExist, x, y, mins[2]);
         if (cubeMin != false) {
-          if (this.get_model(game, cubeMin, "cube") != null) {
+          if (this.getModel(game, cubeMin, "cube") != null) {
             empty.xy.min = false;
           } else {
             cubesToRemove.xy.min.push(cubeMin);
@@ -899,7 +894,7 @@ module.exports = {
 
         let cubeMax = this.getCubeExts(cubesExist, x, y, maxs[2]);
         if (cubeMax != false) {
-          if (this.get_model(game, cubeMax, "cube") != null) {
+          if (this.getModel(game, cubeMax, "cube") != null) {
             empty.xy.max = false;
           } else {
             cubesToRemove.xy.max.push(cubeMax);
@@ -913,7 +908,7 @@ module.exports = {
       for (let z = mins[2]; z <= maxs[2]; z++) {
         let cubeMin = this.getCubeExts(cubesExist, x, mins[1], z);
         if (cubeMin != false) {
-          if (this.get_model(game, cubeMin, "cube") != null) {
+          if (this.getModel(game, cubeMin, "cube") != null) {
             empty.xz.min = false;
           } else {
             cubesToRemove.xz.min.push(cubeMin);
@@ -922,7 +917,7 @@ module.exports = {
 
         let cubeMax = this.getCubeExts(cubesExist, x, maxs[1], z);
         if (cubeMax != false) {
-          if (this.get_model(game, cubeMax, "cube") != null) {
+          if (this.getModel(game, cubeMax, "cube") != null) {
             empty.xz.max = false;
           } else {
             cubesToRemove.xz.max.push(cubeMax);
@@ -935,7 +930,7 @@ module.exports = {
       for (let z = mins[2]; z <= maxs[2]; z++) {
         let cubeMin = this.getCubeExts(cubesExist, mins[0], y, z);
         if (cubeMin != false) {
-          if (this.get_model(game, cubeMin, "cube") != null) {
+          if (this.getModel(game, cubeMin, "cube") != null) {
             empty.yz.min = false;
           } else {
             cubesToRemove.yz.min.push(cubeMin);
@@ -944,7 +939,7 @@ module.exports = {
 
         let cubeMax = this.getCubeExts(cubesExist, maxs[0], y, z);
         if (cubeMax != false) {
-          if (this.get_model(game, cubeMax, "cube") != null) {
+          if (this.getModel(game, cubeMax, "cube") != null) {
             empty.yz.max = false;
           } else {
             cubesToRemove.yz.max.push(cubeMax);
@@ -990,23 +985,23 @@ module.exports = {
 
   selectfiguremarkers: function (game, active_model) {
     var markers = [];
-    //var active_model = tools.get_model(game, model_id, 'id');
+    //var active_model = tools.getModel(game, model_id, 'id');
     if (active_model == "null" || active_model.cube_number == 0) return;
     cube_number = active_model.cube_number;
 
     markers.push({ color: "blue", cube_number: cube_number, flag: 0 });
 
-    var ways = this.figure_ways[active_model.figure](game, cube_number);
+    var ways = this.figureWays[active_model.figure](game, cube_number);
 
     for (var p in ways.move) {
-      var model = this.get_model(game, ways.move[p], "cube");
+      var model = this.getModel(game, ways.move[p], "cube");
       if (model == null) {
         markers.push({ color: "yellow", cube_number: ways.move[p], flag: 1 });
       }
     }
 
     for (var w in ways.war) {
-      var model = this.get_model(game, ways.war[w], "cube");
+      var model = this.getModel(game, ways.war[w], "cube");
       if (
         model != null &&
         model.cube_number != 0 &&
@@ -1119,7 +1114,7 @@ module.exports = {
         game.game_type == "single" &&
         game.users[game.tour].role == "robot"
       ) {
-        tools.glob.bot.Bot_Go2(game, w); //bot go single game
+        tools.glob.bot.botAction(game, w); //bot go single game
       }
     }
   },

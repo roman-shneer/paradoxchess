@@ -398,7 +398,7 @@ class ParadoxChess {
     if (typeof callback == "function") callback();
   }
 
-  get_model(it, what) {
+  getModel(it, what) {
     for (var m in window.Game_UI.models) {
       if (what == "cube" && it == window.Game_UI.models[m].cube_number)
         return window.Game_UI.models[m];
@@ -409,9 +409,9 @@ class ParadoxChess {
   }
 
   move_figure(data) {
-    var from_model = this.get_model(data.active_model, "id");
+    var from_model = this.getModel(data.active_model, "id");
     if (from_model == null) return;
-    var to_model = this.get_model(data.kill_model, "id");
+    var to_model = this.getModel(data.kill_model, "id");
 
     this.write_to_log({
       from_uid: from_model.uid,
@@ -858,7 +858,7 @@ class ParadoxChess {
   }
 
   figure_clicked(cube_id, cube_number) {
-    var model = this.get_model(cube_number, "cube");
+    var model = this.getModel(cube_number, "cube");
     if (typeof model != "undefined" && model.cube_number != 0) {
       this.select_figure(cube_id);
     }

@@ -43,7 +43,7 @@ module.exports = {
     if (game == false) return false;
     message = data.message;
 
-    let myModel = this.glob.tools.get_model(game, message.model_id, "id");
+    let myModel = this.glob.tools.getModel(game, message.model_id, "id");
     var markers = this.glob.tools.selectfiguremarkers(game, myModel);
     this.glob.the_users.sendToGameClients(game, {
       action: "select_figure",

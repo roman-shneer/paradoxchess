@@ -428,11 +428,14 @@ class start_page extends React.Component {
     window.UI.mdkey = window.mdkey;
     this.init_sockets();
     this.gameTypes = [
-      { id: "4", title: "4^3 = 64 cells", players: "(2 " + lang.players + ")" },
+      { id: "4", title: "4^3 = 64 cells" },
+      {
+        id: "5",
+        title: "5^3 = 125 cells",
+      },
       {
         id: "6",
         title: "6^3 = 216 cells",
-        players: "(2 " + lang.players + ")",
       },
     ];
   }

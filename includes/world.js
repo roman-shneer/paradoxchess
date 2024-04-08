@@ -47,6 +47,63 @@ module.exports = {
       ],
     ],
 
+    5: [
+      //player 0
+      [
+        ["pawn", "2:1:2"],
+        ["pawn", "3:1:2"],
+        ["pawn", "1:1:2"],
+        ["pawn", "4:1:2"],
+        ["pawn", "5:1:2"],
+
+        ["pawn", "1:2:2"],
+        ["pawn", "2:2:2"],
+        ["pawn", "3:2:2"],
+        ["pawn", "4:2:2"],
+        ["pawn", "5:2:2"],
+
+        ["castle", "5:1:1"],
+        ["knight", "4:1:1"],
+        ["king", "3:1:1"],
+        ["knight", "2:1:1"],
+        //["queen", "3:1:1"],
+        ["castle", "1:1:1"],
+
+        ["elephant", "1:2:1"],
+        ["pawn", "2:2:1"],
+        ["queen", "3:2:1"],
+        ["pawn", "4:2:1"],
+        ["elephant", "5:2:1"],
+      ], //player 1
+
+      [
+        ["castle", "1:5:5", 1],
+        //["queen", "4:5:5", 1],
+        ["knight", "2:5:5", 1],
+        ["king", "3:5:5", 1],
+        ["knight", "4:5:5", 1],
+        ["castle", "5:5:5", 1],
+
+        ["elephant", "1:4:5", 1],
+        ["pawn", "2:4:5"],
+        ["queen", "3:4:5", 1],
+        ["pawn", "4:4:5"],
+        ["elephant", "5:4:5", 1],
+
+        ["pawn", "1:5:4"],
+        ["pawn", "2:5:4"],
+        ["pawn", "3:5:4"],
+        ["pawn", "4:5:4"],
+        ["pawn", "5:5:4"],
+
+        ["pawn", "1:4:4"],
+        ["pawn", "2:4:4"],
+        ["pawn", "3:4:4"],
+        ["pawn", "4:4:4"],
+        ["pawn", "5:4:4"],
+      ],
+    ],
+
     6: [
       //player 0
       [
@@ -100,7 +157,7 @@ module.exports = {
 
   get_world: function (cube_size) {
     world = this;
-    var total_lines = [];
+    const total_lines = [];
     for (let z = 1; z <= cube_size; z += 1) {
       for (let y = 1; y <= cube_size; y += 1) {
         for (let x = 1; x <= cube_size; x += 1) {
@@ -111,12 +168,12 @@ module.exports = {
 
     return total_lines;
   },
+
   get_figure_positions: function (users, cube_type) {
     world = this;
 
-    var cube_size = cube_type[0];
-    var players_count = Object.keys(users).length;
-    var result = { world: this.get_world(cube_size), models: {}, history: [] };
+    const cube_size = cube_type[0];
+    let result = { world: this.get_world(cube_size), models: {}, history: [] };
     const player = world.figure_positions[cube_type.toString()];
 
     var id = 1;
