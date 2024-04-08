@@ -13,7 +13,6 @@ module.exports = {
   },
 
   start_want_to_play: function (data) {
-    console.log("start_want_to_play");
     message = data.message;
     if (message.game_type == "multy")
       this.glob.tools.bookingGame(
@@ -23,7 +22,7 @@ module.exports = {
         typeof message.user_id != "undefined" ? message.user_id : 0
       );
     if (message.game_type == "single")
-      this.glob.tools.start_single_game(
+      this.glob.tools.startSingleGame(
         data.user_id,
         message.cube_size,
         message.players_count

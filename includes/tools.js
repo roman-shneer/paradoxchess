@@ -15,6 +15,150 @@ module.exports = {
     return game.data.world.includes(d);
   },
 
+  get_pawn_perpend_ways: function (game, cube_number, limit) {
+    //var tools=this;
+    var d = cube_number.split(":");
+    var x = parseInt(d[0]);
+    var y = parseInt(d[1]);
+    var z = parseInt(d[2]);
+    const dir = game.dirs[game.tour];
+    var result = [];
+
+    const add2 = function (x, y, z) {
+      var d = [x, y, z].join(":");
+
+      if (tools.if_world_limit(d, game) == false) return true;
+      result.push(d);
+      return true;
+    };
+
+    //x\y
+    if (dir == 0) {
+      for (
+        x1 = x + 1, y1 = y + 1;
+        x1 <= game.cube_size && y1 <= game.cube_size;
+        x1++, y1++
+      ) {
+        if (add2(x1, y1, z)) {
+          break;
+        }
+      }
+    }
+    if (dir == 1) {
+      for (x1 = x - 1, y1 = y - 1; x1 >= 1 && y1 >= 1; x1--, y1--) {
+        if (add2(x1, y1, z)) {
+          break;
+        }
+      }
+    }
+    if (dir == 1) {
+      for (
+        x1 = x + 1, y1 = y - 1;
+        x1 <= game.cube_size && y1 >= 1;
+        x1++, y1--
+      ) {
+        if (add2(x1, y1, z)) {
+          break;
+        }
+      }
+    }
+    if (dir == 0) {
+      for (
+        x1 = x - 1, y1 = y + 1;
+        x1 >= 1 && y1 <= game.cube_size;
+        x1--, y1++
+      ) {
+        if (add2(x1, y1, z)) {
+          break;
+        }
+      }
+    }
+    //x\z
+    if (dir == 0) {
+      for (
+        x1 = x + 1, z1 = z + 1;
+        x1 <= game.cube_size && z1 <= game.cube_size;
+        x1++, z1++
+      ) {
+        if (add2(x1, y, z1)) {
+          break;
+        }
+      }
+    }
+    if (dir == 1) {
+      for (x1 = x - 1, z1 = z - 1; x1 >= 1 && z1 >= 1; x1--, z1--) {
+        if (add2(x1, y, z1)) {
+          break;
+        }
+      }
+    }
+    if (dir == 1) {
+      for (
+        x1 = x + 1, z1 = z - 1;
+        x1 <= game.cube_size && z1 >= 1;
+        x1++, z1--
+      ) {
+        if (add2(x1, y, z1)) {
+          break;
+        }
+      }
+    }
+    if (dir == 0) {
+      for (
+        x1 = x - 1, z1 = z + 1;
+        x1 >= 1 && z1 <= game.cube_size;
+        x1--, z1++
+      ) {
+        if (add2(x1, y, z1)) {
+          break;
+        }
+      }
+    }
+    //y/z
+    if (dir == 0) {
+      for (
+        z1 = z + 1, y1 = y + 1;
+        z1 <= game.cube_size && y1 <= game.cube_size;
+        z1++, y1++
+      ) {
+        if (add2(x, y1, z1)) {
+          break;
+        }
+      }
+    }
+    if (dir == 1) {
+      for (y1 = y - 1, z1 = z - 1; y1 >= 1 && y1 >= 1; y1--, z1--) {
+        if (add2(x, y1, z1)) {
+          break;
+        }
+      }
+    }
+    if (dir == 1) {
+      for (
+        y1 = y + 1, z1 = z - 1;
+        y1 <= game.cube_size && z1 >= 1;
+        y1++, z1--
+      ) {
+        if (add2(x, y1, z1)) {
+          break;
+        }
+      }
+    }
+    if (dir == 0) {
+      for (
+        y1 = y - 1, z1 = z + 1;
+        y1 >= 1 && z1 <= game.cube_size;
+        y1--, z1++
+      ) {
+        if (add2(x, y1, z1)) {
+          break;
+        }
+      }
+    }
+    console.log(cube_number, dir, result);
+    return result;
+  },
+
   get_perpend_ways: function (game, cube_number, limit) {
     //var tools=this;
     var d = cube_number.split(":");
@@ -84,6 +228,67 @@ module.exports = {
       if (add2(x, y1, z1)) break;
     return result;
   },
+
+  get_pawn_direct_ways: function (game, cube_number, limit) {
+    //tools=this;
+    var d = cube_number.split(":");
+    var x = parseInt(d[0]);
+    var y = parseInt(d[1]);
+    var z = parseInt(d[2]);
+    const dir = game.dirs[game.tour];
+    var result = [];
+    var add_func = function (x, y, z) {
+      var d = [x, y, z].join(":");
+      if (tools.if_world_limit(d, game) == false) return true;
+      result.push(d);
+      return true;
+    };
+
+    /*
+    for (var x1 = x + 1; x1 <= game.cube_size; x1++) {
+      if (add_func(x1, y, z)) {
+        break;
+      }
+    }
+    for (var x1 = x - 1; x1 >= 1; x1--) {
+      if (add_func(x1, y, z)) {
+        break;
+      }
+    }*/
+    //y
+    if (dir == 0) {
+      for (var y1 = y + 1; y1 <= game.cube_size; y1++) {
+        if (add_func(x, y1, z)) {
+          break;
+        }
+      }
+    }
+    if (dir == 1) {
+      for (var y1 = y - 1; y1 >= 1; y1--) {
+        if (add_func(x, y1, z)) {
+          break;
+        }
+      }
+    }
+    //z
+    if (dir == 0) {
+      for (var z1 = z + 1; z1 <= game.cube_size; z1++) {
+        if (add_func(x, y, z1)) {
+          break;
+        }
+      }
+    }
+    if (dir == 1) {
+      for (var z1 = z - 1; z1 >= 1; z1--) {
+        if (add_func(x, y, z1)) {
+          break;
+        }
+      }
+    }
+
+    return result;
+  },
+
   get_direct_ways: function (game, cube_number, limit) {
     //tools=this;
     var d = cube_number.split(":");
@@ -132,10 +337,13 @@ module.exports = {
   figure_ways: {
     pawn: function (game, cube_number) {
       //potencial ways
-      var ways_direct = tools.get_direct_ways(game, cube_number, true);
-      var ways_per = tools.get_perpend_ways(game, cube_number, true);
+      console.log("figure_ways", game.dirs, game.tour, game.dirs[game.tour]);
+      var ways_direct = tools.get_pawn_direct_ways(game, cube_number, true);
+      var ways_per = tools.get_pawn_perpend_ways(game, cube_number, true);
+
       return { move: ways_direct, war: ways_per };
     },
+
     king: function (game, cube_number) {
       //potencial ways
       var ways_direct = tools.get_direct_ways(game, cube_number, true);
@@ -292,7 +500,6 @@ module.exports = {
   },
 
   startGame: function (w) {
-    console.log("startGame");
     let game = this.bookingGames[w];
     const uids = Object.keys(game.users);
     const game_uniq_id = w + ":::" + uids.join(",") + ":::" + tools.now();
@@ -326,12 +533,13 @@ module.exports = {
     }
 
     game.data = tools.prepare_new_game(game.users, game.cube_size);
+
     tools.games[game_uniq_id] = game;
     delete tools.bookingGames[w];
     tools.the_users.sendToStartClients();
   },
 
-  start_single_game: function (user_id, cube_size, players_count) {
+  startSingleGame: function (user_id, cube_size, players_count) {
     user_id = parseInt(user_id);
     the_users = this.the_users;
     var game_key = cube_size + ":::" + players_count;
@@ -351,12 +559,10 @@ module.exports = {
       role: the_users.usersConnected[user_id].data.role,
       status: 1,
     };
-    for (var i = 0; i < players_count - 1; i++) {
-      wgl.users[i.toString()] = {
-        role: "robot",
-        status: 1,
-      };
-    }
+    wgl.users[0] = {
+      role: "robot",
+      status: 1,
+    };
 
     const game_uniq_id =
       game_key + ":::" + Object.keys(wgl.users).join(",") + ":::" + this.now();
@@ -365,8 +571,9 @@ module.exports = {
     this.games[game_uniq_id] = wgl;
     var dir = 0;
     for (let uid in this.games[game_uniq_id].users) {
-      if (uid == user_id)
+      if (uid == user_id) {
         this.glob.the_users.usersConnected[uid].game_key = game_uniq_id;
+      }
       this.games[game_uniq_id].dirs[uid] = dir;
       dir = dir == 0 ? 1 : 0;
       //unselect users from another waiting lists
@@ -389,6 +596,7 @@ module.exports = {
       this.games[game_uniq_id].users,
       this.games[game_uniq_id].cube_size
     );
+    console.log("startSingleGame", this.games[game_uniq_id]);
     delete wgl;
     this.glob.the_users.sendToStartClients();
   },
