@@ -903,7 +903,6 @@ module.exports = {
     tools = this;
     for (var w in tools.games) {
       var game = tools.games[w];
-
       if (game.status == 0 && game.end_time < day_before) {
         //delete old game
         delete tools.games[w];

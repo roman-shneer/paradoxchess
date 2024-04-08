@@ -13,6 +13,7 @@ module.exports = {
   },
 
   start_want_to_play: function (data) {
+    console.log("start_want_to_play");
     message = data.message;
     if (message.game_type == "multy")
       this.glob.tools.bookingGame(
@@ -76,7 +77,7 @@ module.exports = {
   },
 
   game_move: function (data) {
-    let game = this.glob.tools.getActiveGame(data.user_id);
+    const game = this.glob.tools.getActiveGame(data.user_id);
     if (game == false) return false;
     message = data.message;
     if (game.tour != data.user_id) {
@@ -100,6 +101,9 @@ module.exports = {
       };
 
       this.glob.the_users.sendToGameClients(game, answer, true);
+      if (game.game_type == "single") {
+        this.glob.tools.botService();
+      }
       return;
     } else {
       this.glob.the_users.sendToGameClient(data.user_id, game, {
