@@ -19,20 +19,17 @@
 <link rel="stylesheet" href="/css/start.css">
 <script src="/react/umd/react.development.js" type="module"></script>
 <script src="/react-dom/umd/react-dom.development.js" type="module"></script>
-<script src="/scripts/libs/redirect.js"></script>
-<script src="/scripts/libs/colorpicker/jscolor.js"></script>
-
 <script src="/socket.io/socket.io.js"></script>
 <script type="module">
-
-
 
   let page=location.pathname.substr(1,location.pathname.length-2);
   if(page.length==0){
     page='start';
   }
   const PORT='<%= PORT %>';
+
   import(`/scripts/pages/${page}/page.js`).then((module)=>{
+    console.log('Module is ', module);
     module.Start();
   });  
 </script>

@@ -1,20 +1,21 @@
 "use strict";
-import lang from "/scripts/lang/en.js";
-import { uk } from "/scripts/helper.js";
 
+import lang from "/scripts/lang/en.js";
+import Abstract from "/scripts/abstract.js";
 var e = React.createElement;
 
-class StatusTable extends React.Component {
+class StatusTable extends Abstract {
+  UI = null;
   constructor(props) {
     super(props);
-
+    this.UI = props.children.UI;
     this.state = {
       count_connected: 0,
       count_waiting_users: "0",
       count_active_games: 0,
       count_active_users: 0,
     };
-    UI.StatusTable = this;
+    this.UI.StatusTable = this;
   }
 
   chg(data) {
@@ -31,7 +32,7 @@ class StatusTable extends React.Component {
   render() {
     return e(
       "div",
-      { id: "status_table", key: uk() },
+      { id: "status_table", key: this.uk() },
       e(
         "a",
         {
@@ -44,16 +45,16 @@ class StatusTable extends React.Component {
 
       e(
         "span",
-        { id: "connected_nonauth", key: uk() },
+        { id: "connected_nonauth", key: this.uk() },
         e("label", { key: "status_table_users_now" }, lang.users_now + ": "),
         e(
           "span",
-          { id: "count_connected2", key: uk() },
+          { id: "count_connected2", key: this.uk() },
           this.state.count_connected
         ),
         e(
           "label",
-          { className: "hide_on_mobile", key: uk() },
+          { className: "hide_on_mobile", key: this.uk() },
           "  " + lang.in_game + ": "
         ),
         e(
@@ -61,17 +62,17 @@ class StatusTable extends React.Component {
           {
             id: "count_active_players",
             className: "hide_on_mobile",
-            key: uk(),
+            key: this.uk(),
           },
           this.state.count_active_users
         ),
         e(
           "span",
-          { className: "hide_on_mobile", key: uk() },
+          { className: "hide_on_mobile", key: this.uk() },
           "  " + lang.games_now + ": ",
           e(
             "span",
-            { id: "count_active_games", key: uk() },
+            { id: "count_active_games", key: this.uk() },
             this.state.count_active_games
           )
         )
@@ -80,9 +81,12 @@ class StatusTable extends React.Component {
   }
 }
 
-class Parent extends React.Component {
+class Parent extends Abstract {
+  UI = null;
   constructor(props) {
     super(props);
+    this.UI = props.children.UI;
+    console.log("parent", props);
     this.state = {
       user: props.user,
     };
@@ -92,79 +96,86 @@ class Parent extends React.Component {
     return [
       e(
         "h1",
-        { className: "main_title", key: uk() },
-        e("font", { className: "l1", key: uk() }, "P"),
-        e("font", { className: "l2", key: uk() }, "A"),
-        e("font", { className: "l3", key: uk() }, "R"),
-        e("font", { className: "l4", key: uk() }, "A"),
-        e("font", { className: "l5", key: uk() }, "D"),
-        e("font", { className: "l6", key: uk() }, "O"),
-        e("font", { className: "l7", key: uk() }, "X"),
-        e("font", { key: uk() }, "Chess")
+        { className: "main_title", key: this.uk() },
+        e("font", { className: "l1", key: this.uk() }, "P"),
+        e("font", { className: "l2", key: this.uk() }, "A"),
+        e("font", { className: "l3", key: this.uk() }, "R"),
+        e("font", { className: "l4", key: this.uk() }, "A"),
+        e("font", { className: "l5", key: this.uk() }, "D"),
+        e("font", { className: "l6", key: this.uk() }, "O"),
+        e("font", { className: "l7", key: this.uk() }, "X"),
+        e("font", { key: this.uk() }, "Chess")
       ),
-      e("div", { className: "scrollable", key: uk() }, e(WaitGameForm)),
+      e(
+        "div",
+        { className: "scrollable", key: this.uk() },
+        e(WaitGameForm, null, { UI: this.UI })
+      ),
       e(
         "span",
         {
           id: "menu_toggle",
-          key: uk(),
-          onClick: () => UI.left_menu.left_menu_toggle(),
+          key: this.uk(),
+          onClick: () => this.UI.leftMenu.leftMenuToggle(),
         },
         lang.menu
       ),
-      e(left_menu, { key: uk() }),
-      e(StatusTable, { key: uk() }),
+      e(leftMenu, { key: this.uk() }, { UI: this.UI }),
+      e(StatusTable, { key: this.uk() }, { UI: this.UI }),
     ];
   }
 }
 
-class left_menu extends React.Component {
+class leftMenu extends Abstract {
+  UI = null;
   constructor(props) {
     super(props);
+    this.UI = props.children.UI;
+    this.UI.leftMenu = this;
     this.state = { show_mem: 0, show: 0 };
-    UI.left_menu = this;
   }
-  left_menu_toggle() {
+  leftMenuToggle() {
     this.state.show = this.state.show == 0 ? 1 : 0;
     this.setState(this.state);
   }
   chg(data) {
-    if (data.role == "guest") this.state.show_mem = 0;
-    else this.state.show_mem = 1;
+    this.state.show_mem = data.role == "guest" ? 0 : 1;
     this.setState(this.state);
   }
 
   render() {
     var menu = [];
 
-    menu.push(e("a", { href: `/guide/`, key: uk() }, lang.how_to_play));
-    menu.push(e("a", { href: `/rules/`, key: uk() }, lang.game_rules));
+    menu.push(e("a", { href: `/guide/`, key: this.uk() }, lang.how_to_play));
+    menu.push(e("a", { href: `/rules/`, key: this.uk() }, lang.game_rules));
     menu.push(
       e(
         "a",
-        { href: "mailto:paradoxchess@gmail.com?subject=Bug", key: uk() },
+        { href: "mailto:paradoxchess@gmail.com?subject=Bug", key: this.uk() },
         lang.report_bug
       )
     );
 
-    if (lang.url != "") menu.push(e("a", { href: "/", key: uk() }, "English"));
+    if (lang.url != "")
+      menu.push(e("a", { href: "/", key: this.uk() }, "English"));
 
     return e(
       "div",
       {
         id: "left_menu",
         className: this.state.show == 0 ? "" : "menu_open",
-        key: uk(),
+        key: this.uk(),
       },
       menu
     );
   }
 }
 
-class WaitGameForm extends React.Component {
+class WaitGameForm extends Abstract {
+  UI = null;
   constructor(props) {
     super(props);
-    this.ownGames = [];
+    this.own_games = [];
 
     this.state = {
       game_type: 0,
@@ -176,11 +187,13 @@ class WaitGameForm extends React.Component {
       count_connected: 0,
       own_games: {},
     };
-    UI.WaitGameForm = this;
+    this.UI = props.children.UI;
+
+    this.UI.WaitGameForm = this;
   }
   chg(data) {
     if (typeof data.bookingGames != "undefined") {
-      this.ownGames = [];
+      this.own_games = [];
 
       this.state.gameOffers = {};
       this.state.gameOffersCount = 0;
@@ -188,7 +201,7 @@ class WaitGameForm extends React.Component {
         var cubeSize = data.bookingGames[k].cube_size;
         var players = data.bookingGames[k].players;
         if (typeof data.bookingGames[k].users[window.user_id] != "undefined")
-          this.ownGames.push(data.bookingGames[k].cube_size);
+          this.own_games.push(data.bookingGames[k].cube_size);
 
         if (typeof this.state.gameOffers[cubeSize] == "undefined")
           this.state.gameOffers[cubeSize] = { players: {}, count: 0 };
@@ -201,12 +214,13 @@ class WaitGameForm extends React.Component {
       }
       this.state.count_connected = parseInt(data.count_connected);
 
-      var ownGames = Object.keys(data.own_games);
+      var own_games = Object.keys(data.own_games);
       this.state.own_games = {};
-      for (var w in ownGames) {
-        var ow = ownGames[w].split(":::");
-        if (typeof this.state.own_games[ow[0]] == "undefined")
+      for (var w in own_games) {
+        var ow = own_games[w].split(":::");
+        if (typeof this.state.own_games[ow[0]] == "undefined") {
           this.state.own_games[ow[0]] = {};
+        }
         this.state.own_games[ow[0]][ow[1]] = 1;
       }
 
@@ -243,7 +257,7 @@ class WaitGameForm extends React.Component {
     };
     for (var e in extra) args[e] = extra[e];
 
-    UI.send2(args);
+    this.UI.send2(args);
 
     this.state.cube_size = 0;
     this.state.players_count = 0;
@@ -255,7 +269,7 @@ class WaitGameForm extends React.Component {
     else return true;
   }
   register_game() {
-    UI.WaitGameForm.requestGame(
+    this.UI.WaitGameForm.requestGame(
       this.state.with_user != 0 ? { user_id: this.state.with_user } : null
     );
     this.back();
@@ -264,39 +278,45 @@ class WaitGameForm extends React.Component {
     this.chg_menu("players_count", players_count);
   }
   cancel(e) {
-    UI.send2({
+    this.UI.send2({
       gkey: e,
       action: "want_to_cancel",
     });
   }
+
+  _gameImagePath(id) {
+    return `/images/game_types/${id}.png`;
+  }
+
   render() {
     var result = [];
     var form = [];
     var gameType = this.state.game_type;
-    var cubeSize = this.state.cube_size;
-    var playersCount = this.state.players_count;
+    //var cubeSize = this.state.cube_size;
+    //var playersCount = this.state.players_count;
+
     result.push(
       e(
         "div",
-        { className: "form_row1", key: uk() },
+        { className: "form_row1", key: this.uk() },
         e("img", {
           src: `/images/logo.png`,
           width: 100,
-          style: { float: "left", key: uk() },
+          style: { float: "left", key: this.uk() },
         }),
         lang.greeting_1,
-        e("br", { key: uk() }),
-        e("br", { key: uk() }),
+        e("br", { key: this.uk() }),
+        e("br", { key: this.uk() }),
         lang.greeting_3,
-        e("br", { key: uk() }),
-        e("br", { key: uk() }),
+        e("br", { key: this.uk() }),
+        e("br", { key: this.uk() }),
         e(
           "div",
-          { className: "form_row1", key: uk() },
+          { className: "form_row1", key: this.uk() },
           this.state.count_connected < 2
             ? e(
                 "span",
-                { className: "no_users", key: uk() },
+                { className: "no_users", key: this.uk() },
                 lang.no_users_online
               )
             : null
@@ -310,13 +330,13 @@ class WaitGameForm extends React.Component {
       let rows1 = [
         e(
           "label",
-          { className: "form_label2", key: uk() },
+          { className: "form_label2", key: this.uk() },
           `Play online (${this.state.count_connected} online)`
         ),
       ];
-      for (let i in UI.gameTypes) {
-        let id = UI.gameTypes[i].id;
-
+      for (let i in this.UI.gameTypes) {
+        let id = this.UI.gameTypes[i].id;
+        console.log("ud", id);
         rows1.push(
           e(
             "span",
@@ -330,15 +350,15 @@ class WaitGameForm extends React.Component {
               onClick: (e) =>
                 this.chg_menu("cube_size", e.target.getAttribute("val")),
             },
-            UI.gameTypes[i].title,
+            this.UI.gameTypes[i].title,
             e("img", {
-              src: `/images/game_types/${UI.gameTypes[i].id}.gif`,
+              src: this._gameImagePath(id),
               key: `cube_img${i}`,
-              val: UI.gameTypes[i].id,
+              val: id,
               onClick: (e) =>
                 this.startGame(e.target.getAttribute("val"), "multy"),
             }),
-            this.ownGames.indexOf(id) != -1
+            this.own_games.indexOf(id) != -1
               ? e(
                   "button",
                   {
@@ -351,7 +371,7 @@ class WaitGameForm extends React.Component {
                   lang.cancel
                 )
               : null,
-            this.ownGames.indexOf(id) == -1 &&
+            this.own_games.indexOf(id) == -1 &&
               typeof this.state.gameOffers[id] != "undefined"
               ? e(
                   "span",
@@ -362,13 +382,17 @@ class WaitGameForm extends React.Component {
           )
         );
       }
-      form.push(e("div", { className: "select_board", key: uk() }, rows1));
+      form.push(e("div", { className: "select_board", key: this.uk() }, rows1));
     }
     let rows = [
-      e("label", { className: "form_label2", key: uk() }, "Play with computer"),
+      e(
+        "label",
+        { className: "form_label2", key: this.uk() },
+        "Play with computer"
+      ),
     ];
-    for (let i in UI.gameTypes) {
-      let id = UI.gameTypes[i].id;
+    for (let i in this.UI.gameTypes) {
+      const id = this.UI.gameTypes[i].id;
       rows.push(
         e(
           "span",
@@ -384,9 +408,9 @@ class WaitGameForm extends React.Component {
             onClick: (e) =>
               this.chg_menu("cube_size", e.target.getAttribute("val")),
           },
-          UI.gameTypes[i].title,
+          this.UI.gameTypes[i].title,
           e("img", {
-            src: `/images/game_types/${id}.gif`,
+            src: this._gameImagePath(id),
             val: id,
             key: `cube_size_image${i}`,
             onClick: (e) =>
@@ -403,29 +427,31 @@ class WaitGameForm extends React.Component {
         )
       );
     }
-    form.push(e("div", { className: "select_board", key: uk() }, rows));
+    form.push(e("div", { className: "select_board", key: this.uk() }, rows));
 
-    result.push(e("div", { className: "form_row1", key: uk() }, form));
+    result.push(e("div", { className: "form_row1", key: this.uk() }, form));
     //  }
     //return result;
-    return e("div", { id: "wait_game_form", key: uk() }, result);
+    return e("div", { id: "wait_game_form", key: this.uk() }, result);
   }
 }
 
-class start_page extends React.Component {
+class startPage extends Abstract {
+  mdkey = null;
+  config = null;
   constructor(prop) {
     super();
 
-    window.mdkey = getUserKey();
+    this.mdkey = this.getUserKey();
 
-    if (typeof window.mdkey == "undefined") {
-      window.mdkey = makeid(16);
-      saveUserKey(window.mdkey);
+    if (typeof this.mdkey == "undefined") {
+      this.mdkey = this.makeid(16);
+      this.saveUserKey(this.mdkey);
     }
 
-    window.UI = this;
-    window.UI.config = get_config();
-    window.UI.mdkey = window.mdkey;
+    //window.UI = this;
+    this.config = this.getConfig();
+    //window.UI.mdkey = this.mdkey;
     this.init_sockets();
     this.gameTypes = [
       { id: "4", title: "4^3 = 64 cells" },
@@ -459,7 +485,7 @@ class start_page extends React.Component {
           typeof data.action != "undefined" &&
           data.action == "redirect2game"
         ) {
-          redirect("/game/");
+          this.redirect("/game/");
           return;
         }
         this.update(data);
@@ -467,16 +493,15 @@ class start_page extends React.Component {
     });
     window.socket = socket;
   }
+
   action_set_key(data) {
-    console.log("action_set_key", data.key);
-    window.mdkey = this.mdkey = data.key;
-    saveUserKey(window.mdkey);
+    this.mdkey = data.key;
+    this.saveUserKey(this.mdkey);
   }
 
   send2(args) {
     args.page = "start";
-    args.mdkey = window.mdkey;
-    console.log("send2", args);
+    args.mdkey = this.mdkey;
     window.socket.emit("message", JSON.stringify(args));
   }
 
@@ -489,30 +514,32 @@ class start_page extends React.Component {
 
   update(data) {
     this.data = data;
-    UI.StatusTable.chg(data);
-    UI.WaitGameForm.chg(data);
-    UI.left_menu.chg(data);
+
+    this.StatusTable.chg(data);
+    this.WaitGameForm.chg(data);
+    this.leftMenu.chg(data);
     if (
       typeof data.action != "undefiend" &&
-      typeof UI["action_" + data.action] == "function"
+      typeof this["action_" + data.action] == "function"
     ) {
-      UI["action_" + data.action](data);
+      this["action_" + data.action](data);
     }
   }
-  render() {
-    window.mdkey = getUserKey();
 
-    if (typeof window.mdkey == "undefined") {
-      window.mdkey = makeid(16);
-      saveUserKey(window.mdkey);
+  render() {
+    this.mdkey = this.getUserKey();
+
+    if (typeof this.mdkey == "undefined") {
+      this.mdkey = this.makeid(16);
+      this.saveUserKey(this.mdkey);
     }
-    return [e(Parent, { key: uk() })];
+    return [e(Parent, { key: this.uk() }, { UI: this })];
   }
 }
 
 var Start = function () {
   const root = ReactDOM.createRoot(document.querySelector("#main"));
-  root.render(React.createElement(start_page));
+  root.render(React.createElement(startPage));
 };
 
 export { Start };

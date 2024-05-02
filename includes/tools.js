@@ -243,17 +243,6 @@ module.exports = {
       return true;
     };
 
-    /*
-    for (var x1 = x + 1; x1 <= game.cube_size; x1++) {
-      if (add_func(x1, y, z)) {
-        break;
-      }
-    }
-    for (var x1 = x - 1; x1 >= 1; x1--) {
-      if (add_func(x1, y, z)) {
-        break;
-      }
-    }*/
     //y
     if (dir == 0) {
       for (var y1 = y + 1; y1 <= game.cube_size; y1++) {

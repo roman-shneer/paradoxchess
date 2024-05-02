@@ -152,6 +152,7 @@ io.on("connection", (socket) => {
     message = JSON.parse(message);
 
     var user_key = message.mdkey;
+    console.log(user_key);
     var user_id = the_users.user_by_key(user_key);
 
     if (message.page != "stat") {

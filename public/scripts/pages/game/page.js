@@ -1,106 +1,75 @@
 "use strict";
 import lang from "/scripts/lang/en.js";
 import GAME from "./game.js";
-import { uk } from "/scripts/helper.js";
+import Abstract from "/scripts/abstract.js";
 
-class game_options extends React.Component {
+class gameOptions extends Abstract {
   constructor(props) {
     super(props);
-    var user_options = localStorage.getItem("user_options");
-    this.defaultPlayersColors = ["#7F00FF", "#00FF55", "#FF552A", "#557FFF"];
-
-    if (user_options == null) {
-      var user_options = {
-        theme: "0",
-        nosound: false,
-        vr: false,
-        colors: this.defaultPlayersColors,
-        line_color: "#0000FF",
-      };
-      localStorage.setItem("user_options", JSON.stringify(user_options));
-    } else {
-      user_options = JSON.parse(user_options);
-    }
-
+    UI.gameOptions = this;
     this.state = {};
-    this.state.user_options = user_options;
+    this.state.userOptions = UI.GAME.getUserOptions();
     this.state.show = 0;
 
     this.state.userColors = {};
     this.ucolorRefs = {};
     this.lineColorRef = React.createRef();
-
-    Game_UI.game_options = this;
   }
 
   addMissingColors() {
-    var usersCount = Object.keys(Game_UI.users).length;
+    var usersCount = Object.keys(UI.users).length;
 
-    if (this.state.user_options.colors.length < usersCount) {
+    if (this.state.userOptions.colors.length < usersCount) {
       for (var u in this.defaultPlayersColors) {
         if (
-          this.state.user_options.colors.includes(
+          this.state.userOptions.colors.includes(
             this.defaultPlayersColors[u]
           ) == false
         ) {
-          this.state.user_options.colors.push(this.defaultPlayersColors[u]);
-          if (this.state.user_options.colors.length == usersCount) break;
+          this.state.userOptions.colors.push(this.defaultPlayersColors[u]);
+          if (this.state.userOptions.colors.length == usersCount) break;
         }
       }
-      localStorage.setItem(
-        "user_options",
-        JSON.stringify(this.state.user_options)
-      );
+      UI.GAME.setUserOptions(this.state.userOptions);
       this.setState(this.state);
     }
     //
   }
 
-  componentDidUpdate() {
-    for (var i in this.ucolorRefs) {
-      if (this.ucolorRefs[i].current != null)
-        new jscolor(this.ucolorRefs[i].current);
-    }
-    if (this.lineColorRef.current != null)
-      new jscolor(this.lineColorRef.current);
-  }
-
   handleChange(name, value) {
-    this.state.user_options[name] = value;
+    this.state.userOptions[name] = value;
   }
 
   applyChanges() {
     //get colors from jscolor elements
-    this.state.user_options.colors = [];
+    this.state.userOptions.colors = [];
+
     for (var uid in this.ucolorRefs) {
       this.state.userColors[uid] = this.ucolorRefs[uid].current.value;
-      this.state.user_options.colors.push(
-        "#" + this.ucolorRefs[uid].current.value
-      );
+      this.state.userOptions.colors.push(this.ucolorRefs[uid].current.value);
     }
-    this.state.user_options.line_color = "#" + this.lineColorRef.current.value;
-    localStorage.setItem(
-      "user_options",
-      JSON.stringify(this.state.user_options)
-    );
-    window.reload();
+    this.state.userOptions.line_color = this.lineColorRef.current.value;
+    localStorage.setItem("userOptions", JSON.stringify(this.state.userOptions));
+    UI.GAME.setUserOptions(this.state.userOptions);
+    window.location.reload();
   }
   exit_game() {
     if (confirm(lang.wanna_leave_game)) {
-      Game_UI.send2({ action: "exit_game" });
-      setTimeout(function () {
-        redirect("/");
+      UI.send2({ action: "exit_game" });
+      setTimeout(() => {
+        this.redirect("/");
       }, 300);
     }
   }
 
   renderColorPicker(uid) {
     this.ucolorRefs[uid] = React.createRef();
-    this.state.userColors[uid] = Game_UI.user_color(uid);
+    this.state.userColors[uid] = UI.GAME.getUserColor(uid);
     return e(
       "input",
       {
-        className: "jscolor {valueElement:'color" + uid + "'}",
+        //className: "jscolor {valueElement:'color" + uid + "'}",
+        type: "color",
         key: "color" + uid,
         id: "color" + uid,
         name: "color" + uid,
@@ -116,27 +85,28 @@ class game_options extends React.Component {
     if (this.state.show == 0) return null;
 
     this.addMissingColors();
-    var colors = [e("label", { key: uk() }, lang.player_colors)];
-    colors.push(this.renderColorPicker(Game_UI.user_id));
-    for (var uid in Game_UI.users) {
-      if (uid != Game_UI.user_id) colors.push(this.renderColorPicker(uid));
+    var colors = [e("label", { key: this.uk() }, lang.player_colors)];
+    colors.push(this.renderColorPicker(UI.GAME.getUserId()));
+    for (var uid in UI.users) {
+      if (uid != UI.GAME.getUserId()) colors.push(this.renderColorPicker(uid));
     }
     return e(
       "div",
-      { id: "game_options", key: uk() },
-      e("div", { key: uk() }, colors),
+      { id: "game_options", key: this.uk() },
+      e("div", { key: this.uk() }, colors),
       e(
         "div",
-        { key: uk() },
+        { key: this.uk() },
         e("label", null, lang.line_color + ":"),
         e(
           "input",
           {
-            className: "jscolor {valueElement:'line_color'}",
+            //   className: "jscolor {valueElement:'line_color'}",
+            type: "color",
             name: "line_color",
-            key: uk(),
+            key: this.uk(),
             id: "line_color",
-            defaultValue: this.state.user_options.line_color,
+            defaultValue: this.state.userOptions.line_color,
             ref: this.lineColorRef,
           },
           null
@@ -144,19 +114,23 @@ class game_options extends React.Component {
       ),
       e(
         "button",
-        { onClick: () => this.applyChanges(), key: uk() },
+        { onClick: () => this.applyChanges(), key: this.uk() },
         lang.apply_changes
       ),
       e(
         "button",
-        { id: "exit_game_btn", onClick: () => this.exit_game(), key: uk() },
+        {
+          id: "exit_game_btn",
+          onClick: () => this.exit_game(),
+          key: this.uk(),
+        },
         lang.leave_game
       )
     );
   }
 }
 
-class game_menu extends React.Component {
+class game_menu extends Abstract {
   constructor(props) {
     super(props);
     this.state = {
@@ -165,13 +139,19 @@ class game_menu extends React.Component {
       unselect_show: 0,
       chat_button_color: "chatbtn_green",
     };
-    Game_UI.game_menu = this;
-    this.GAME = Game_UI.GAME;
+
+    UI.game_menu = this;
+    //this.GAME = Game_UI.GAME;
+  }
+
+  updateUnselectShow(value) {
+    this.state.unselect_show = value;
+    this.setState(this.state);
   }
 
   unselect() {
-    this.GAME.clear_marked_cubes();
-    Game_UI.send2({ action: "select_none" });
+    UI.GAME.clearMarkedCubes();
+    UI.send2({ action: "select_none" });
   }
 
   render() {
@@ -181,7 +161,11 @@ class game_menu extends React.Component {
       this.state.unselect_show == 1
         ? e(
             "button",
-            { id: "unselect_btn", key: uk(), onClick: () => this.unselect() },
+            {
+              id: "unselect_btn",
+              key: this.uk(),
+              onClick: () => this.unselect(),
+            },
             lang.unselect
           )
         : null
@@ -190,32 +174,29 @@ class game_menu extends React.Component {
 }
 
 //menu toggle button
-class menu_toggle extends React.Component {
-  toggle_game_options() {
-    if (Game_UI.game_options.state.show == 0) {
-      Game_UI.game_options.state.show = 1;
-      Game_UI.game_options.setState(Game_UI.game_options.state);
-    } else {
-      Game_UI.game_options.state.show = 0;
-      Game_UI.game_options.setState(Game_UI.game_options.state);
-    }
-    //
+class menu_toggle extends Abstract {
+  constructor(props) {
+    super(props);
+  }
+  toggleGameOptions() {
+    UI.gameOptions.state.show = UI.gameOptions.state.show == 0 ? 1 : 0;
+    UI.gameOptions.setState(UI.gameOptions.state);
   }
   render() {
     return e("img", {
       src: "/images/menu.png",
       id: "game_options_button",
       key: "menu_toggle",
-      onClick: () => this.toggle_game_options(),
+      onClick: () => this.toggleGameOptions(),
     });
   }
 }
 
-class Log extends React.Component {
-  constructor() {
-    super();
+class Log extends Abstract {
+  constructor(props) {
+    super(props);
     this.state = { log: {} };
-    Game_UI.Log = this;
+    UI.Log = this;
   }
   add(arg) {
     this.state.log = arg;
@@ -255,11 +236,14 @@ class Log extends React.Component {
   }
 }
 
-class WaitingClock extends React.Component {
+class WaitingClock extends Abstract {
   constructor() {
     super();
     this.state = { show: 0 };
-    Game_UI.WaitingClock = this;
+    UI.WaitingClock = this;
+  }
+  hide() {
+    this.setState({ show: 0 });
   }
   render() {
     if (this.state.show == 0) return null;
@@ -271,47 +255,57 @@ class WaitingClock extends React.Component {
     });
   }
 }
-class Parent extends React.Component {
-  constructor() {
-    super();
+
+class Parent extends Abstract {
+  constructor(props) {
+    super(props);
     this.canvasRef = React.createRef();
-    Game_UI.Parent = this;
+    UI.Parent = this;
   }
 
   render() {
-    return e("div", { key: uk() }, [
+    return e("div", { key: this.uk() }, [
       e(WaitingClock, { key: "WaitingClock" }),
-      e("div", { id: "bar", key: uk() }, e(game_menu)),
-      e(Log, { key: uk() }),
-      e("div", { id: "game_bar", key: uk() }),
-      e(menu_toggle, { key: uk() }),
-      e(game_options, { key: uk() }),
-      e("canvas", { id: "canvas", ref: this.canvasRef, key: uk() }),
+      e("div", { id: "bar", key: this.uk() }, e(game_menu)),
+      e(Log, { key: this.uk() }),
+      e("div", { id: "game_bar", key: this.uk() }),
+      e(menu_toggle, { key: this.uk() }),
+      e(gameOptions, { key: this.uk() }),
+      e("canvas", { id: "canvas", ref: this.canvasRef, key: this.uk() }),
     ]);
   }
 }
 
 const e = React.createElement;
+var UI;
+class gamePage extends Abstract {
+  constructor(props) {
+    super(props);
+    UI = this;
+    this.GAME = new GAME();
 
-class game_page extends React.Component {
-  constructor() {
-    super();
-    this.GAME = window.GAME;
+    this.mdkey = this.getUserKey();
 
-    window.mdkey = getUserKey();
-
-    if (typeof window.mdkey == "undefined") {
-      window.mdkey = makeid(16);
-      saveUserKey(window.mdkey);
+    if (this.mdkey == null) {
+      this.mdkey = this.makeid(16);
+      this.saveUserKey(this.mdkey);
     }
-    this.init_status = 0;
+    this.initStatus = false;
     this.data = {};
-    window.Game_UI = this;
 
-    this.config = get_config();
-    this.mdkey = window.mdkey;
-
+    this.config = this.getConfig();
     this.init_sockets();
+    this.initHandlers();
+  }
+
+  initHandlers() {
+    document.addEventListener("send2", (e) => {
+      this.send2(e.detail);
+    });
+
+    document.addEventListener("send2ui", (e) => {
+      this[e.detail.name][e.detail.method](e.detail.value);
+    });
   }
 
   init_sockets() {
@@ -325,159 +319,147 @@ class game_page extends React.Component {
       socket.on("message", (data) => {
         data = JSON.parse(data);
 
-        if (typeof data.winner != "undefined") this.winner = data.winner;
+        if (typeof data.winner != "undefined") {
+          this.winner = data.winner;
+        }
 
-        if (this.init_status == 1) this.update(data);
-        if (typeof data.action != "undefined")
+        if (this.initStatus) {
+          this.update(data);
+        }
+        if (typeof data.action != "undefined") {
           this["action_" + data.action](data);
+        }
 
         if (typeof data.error != "undefined" && data.error.length > 0) {
-          message_alert(data.error);
+          this.alert(data.error);
         }
       });
     });
     window.socket = socket;
   }
-  send2(args) {
-    args.page = "game";
-    args.mdkey = window.mdkey;
 
-    window.socket.emit("message", JSON.stringify(args));
-  }
   render() {
     return e(Parent);
   }
+
   start(info) {
-    window.send2 = Game_UI.send2;
-    Game_UI.init_status = 1;
-    this.GAME.init(Game_UI.cube_size, Game_UI.world, info);
+    this.initStatus = true;
+    this.GAME.init({
+      name: "init",
+      cube_size: this.cube_size,
+      world: this.world,
+      info: info,
+      models: this.models,
+      canvas: this.Parent.canvasRef.current,
+      lineColor: this.gameOptions.state.userOptions.line_color,
+      users: this.users,
+      userId: UI.GAME.getUserId(),
+    });
   }
 
   update(data) {
     if (["select_figure"].includes(data.action) == false) {
       if (typeof data.info != "undefined") {
-        this.GAME.draw_info(data.info);
+        this.GAME.draw_info({ message: data.info });
       }
     }
   }
+
   action_remove_cubes(data) {
     for (let c in data.cubes) {
-      this.GAME.flyCube(data.cubes[c]);
+      this.GAME.flyCube({ cube: data.cubes[c] });
     }
-    Game_UI.world = data.world;
+    this.world = data.world;
   }
+
   send2(args) {
     args.page = "game";
-    args.mdkey = Game_UI.mdkey;
+    args.mdkey = this.mdkey;
     if (typeof args.action_cube != "undefined") {
-      args.active_cube = window.active_cube;
-      delete window.action_cube;
+      args.active_cube = UI.GAME.active_cube;
     }
 
     window.socket.emit("message", JSON.stringify(args));
   }
+
   action_game_over(data) {
-    this.GAME.finish_game(
-      data.winner == Game_UI.user_id ? lang.you_win : lang.you_lose,
-      data
-    );
-    Game_UI.WaitingClock.setState({ show: 0 });
+    this.GAME.finish_game({
+      message: data.winner == UI.GAME.userId ? lang.you_win : lang.you_lose,
+      world: data,
+    });
+    this.WaitingClock.setState({ show: 0 });
   }
 
   action_redirect2home(data) {
-    redirect("/");
+    this.redirect("/");
   }
 
   action_load_data(data) {
-    Game_UI.game_id = data.game_id;
-    Game_UI.cube_size = data.cube_size;
-    Game_UI.game_type = data.game_type;
-    Game_UI.world = data.world;
+    this.game_id = data.game_id;
+    this.cube_size = data.cube_size;
+    this.game_type = data.game_type;
+    this.world = data.world;
 
-    Game_UI.models = data.models;
-    Game_UI.tour = data.tour;
-    Game_UI.user_id = data.user_id;
-    Game_UI.users = data.users;
+    this.models = data.models;
+    //this.tour = data.tour;
+    UI.GAME.setTour(data.tour);
+    UI.GAME.setUserId(data.user_id);
+    this.users = data.users;
 
     if (typeof data.info != "undefined") {
       var message = data.info;
     } else {
       var message = false;
     }
-    Game_UI.start(message);
+    this.start(message);
   }
 
   action_set_key(data) {
-    window.mdkey = this.mdkey = data.key;
-    saveUserKey(window.mdkey);
-  }
-
-  play_sound(sound) {
-    if (Game_UI.game_options.state.nosound == 0) {
-      switch (sound) {
-        case "start":
-          Game_UI.sounds.myRef.current.play();
-          break;
-        case "click":
-          break;
-        case "shah":
-          Game_UI.sounds.myRef.current.play();
-          break;
-        case "killme":
-          Game_UI.sounds.myRef.current.play();
-          break;
-        case "ikill":
-          break;
-        case "killother":
-          Game_UI.sounds.myRef.current.play();
-          break;
-        case "move":
-          break;
-      }
-    }
-  }
-  user_color(uid) {
-    return Game_UI.game_options.state.user_options.colors[
-      Object.keys(Game_UI.users).indexOf(uid.toString())
-    ];
+    this.mdkey = data.key;
+    this.saveUserKey(this.mdkey);
   }
 
   action_select_green(data) {
-    this.GAME.select_green_slave(data, data.cube_number);
+    console.log(data);
+    this.GAME.select_green_slave({
+      cube_number: data.cube_number,
+    });
   }
 
   action_select_none(data) {
-    this.GAME.clear_marked_cubes();
+    this.GAME.clearMarkedCubes();
   }
 
   action_select_figure(data) {
-    this.GAME.select_figure_and_mark(data, data.select_markers);
+    this.GAME.select_figure_and_mark({ markers: data.select_markers });
   }
 
   action_move(data) {
-    this.GAME.move_figure(data.move);
-    if (data.tour != undefined) Game_UI.tour = data.tour;
+    this.GAME.move_figure({
+      data: data.move,
+    });
+    if (data.tour != undefined) {
+      UI.GAME.setTour(data.tour);
+    }
   }
   action_reload_map(data) {
-    this.GAME.reload_figures(data);
+    this.GAME.reload_figures({ data: data });
   }
   action_reload(data) {
-    reload();
+    window.location.reload();
   }
   action_time_warning(data) {
-    Game_UI.WaitingClock.state.show = 1;
-    Game_UI.WaitingClock.setState(Game_UI.WaitingClock.state);
+    this.WaitingClock.state.show = 1;
+    this.WaitingClock.setState(this.WaitingClock.state);
   }
   toString() {
     return JSON.stringify(this);
   }
 }
 
-var Start = function (GAME, ROOTPATH) {
-  window.ROOTPATH = ROOTPATH;
-  window.GAME = new GAME();
+var Start = function () {
   const root = ReactDOM.createRoot(document.getElementById("main"));
-  root.render(React.createElement(game_page));
+  root.render(React.createElement(gamePage));
 };
 
 export { Start, GAME };

@@ -14,35 +14,27 @@ function resizeRendererToDisplaySize(renderer) {
   if (needResize) {
     window.renderer.setSize(width, height, false);
   }
-
-  //GAME.stop_rotation();
   return needResize;
 }
 
 function requestRenderIfNotRequested() {
-  //if (!renderRequested) {
   if (typeof renderRequested == "undefined") {
     var renderRequested = true;
-    //requestAnimationFrame(GAME.render);
-    window.renderer.setAnimationLoop(window.GAME.render);
+    window.renderer.setAnimationLoop(GAME.render);
   }
 }
 
-function onTouchDown(event) {
-  window.mouse.x =
-    (window.touch_position.clientX / window.renderer.domElement.clientWidth) *
-      2 -
+function onTouchDown() {
+  this.mouse.x =
+    (this.touch_position.clientX / window.renderer.domElement.clientWidth) * 2 -
     1;
-  window.mouse.y =
-    -(window.touch_position.clientY / window.renderer.domElement.clientHeight) *
+  this.mouse.y =
+    -(this.touch_position.clientY / window.renderer.domElement.clientHeight) *
       2 +
     1;
-  window.raycaster.setFromCamera(window.mouse, window.camera);
+  GAME.raycaster.setFromCamera(this.mouse, GAME.camera);
 
-  var intersects = window.raycaster.intersectObjects(
-    window.scene.children,
-    true
-  );
+  var intersects = GAME.raycaster.intersectObjects(this.scene.children, true);
 
   for (var i in intersects) {
     if (
@@ -50,29 +42,24 @@ function onTouchDown(event) {
       intersects[i].object.type == "Scene"
     ) {
       if (typeof intersects[i].object.callback == "function") {
-        intersects[i].object.callback();
+        intersects[i].object.callback(intersects[i].object);
         break;
       }
-    } else {
     }
   }
-  //GAME.stop_rotation();
 }
 
 function onDocumentMouseDown(event) {
   if (event.target.id != "canvas") return;
   event.preventDefault();
   //GAME.stop_rotation();
-  window.mouse.x =
+  GAME.mouse.x =
     (event.clientX / window.renderer.domElement.clientWidth) * 2 - 1;
-  window.mouse.y =
+  GAME.mouse.y =
     -(event.clientY / window.renderer.domElement.clientHeight) * 2 + 1;
-  window.raycaster.setFromCamera(window.mouse, window.camera);
+  GAME.raycaster.setFromCamera(GAME.mouse, GAME.camera);
 
-  var intersects = window.raycaster.intersectObjects(
-    window.scene.children,
-    true
-  );
+  var intersects = GAME.raycaster.intersectObjects(GAME.scene.children, true);
 
   for (var i in intersects) {
     if (
@@ -80,21 +67,20 @@ function onDocumentMouseDown(event) {
       intersects[i].object.type == "Scene"
     ) {
       if (typeof intersects[i].object.callback == "function") {
-        intersects[i].object.callback();
+        intersects[i].object.callback(intersects[i].object);
         break;
       }
-    } else {
     }
   }
 }
 
 function threeRenderMain() {
-  for (let a in window.animationsObjects) {
-    let mesh = window.animationsObjects[a];
+  for (let a in GAME.animationsObjects) {
+    let mesh = GAME.animationsObjects[a];
     if (mesh.userData.clock && mesh.userData.mixer) {
       mesh.userData.mixer.update(mesh.userData.clock.getDelta());
       if (mesh.animationAction.isRunning() == false) {
-        delete window.animationsObjects[a];
+        delete GAME.animationsObjects[a];
         mesh.end_callback(mesh);
       }
     }
@@ -102,15 +88,19 @@ function threeRenderMain() {
 }
 
 function animateMain() {
-  window.animation_id = requestAnimationFrame(animateMain);
-  //threeRender2();
+  requestAnimationFrame(animateMain);
   threeRenderMain();
 }
-
+var GAME;
 class ParadoxChess {
   active_status = true;
   linesByCube = {};
-
+  touch_status = null;
+  models = [];
+  userOptions = null;
+  userId = null;
+  tour = null;
+  avatar = null;
   figure_models = {
     king: {
       rotation: [0, 0, 0],
@@ -149,26 +139,38 @@ class ParadoxChess {
       pos: [0, 0.45, 0],
     },
   };
-  constructor() {
-    window.animationsObjects = [];
-    window.methId = 0;
-  }
-  init(cube_size, world, info) {
-    window.markers = [];
-    window.animation_ids = [];
-    var loader = new FontLoader();
 
-    loader.load("/fonts/helvetiker_regular.typeface.json", (font) => {
-      window.font = font;
-      this.draw_world(cube_size, world);
+  constructor() {
+    this.animationsObjects = [];
+    GAME = this;
+    this.initHandlers();
+  }
+
+  initHandlers() {
+    document.addEventListener("send2game", (e) => {
+      this[e.detail.name](e.detail);
+    });
+  }
+
+  init(args) {
+    const info = args.info;
+    this.models = args.models;
+    this.users = args.users;
+    this.userId = args.userId;
+    this.markers = [];
+
+    new FontLoader().load("/fonts/helvetiker_regular.typeface.json", (font) => {
+      this.font = font;
+      this.draw_world(args);
       this.draw_map();
-      this.draw_info(info, "#FF0000");
+      this.draw_info({ message: info, color: "#FF0000" });
       this.switchTourHandle();
     });
   }
 
-  draw_world(cube_size, world) {
-    const canvas = window.Game_UI.Parent.canvasRef.current;
+  draw_world(args) {
+    const cube_size = args.cube_size;
+    const world = args.world;
     window.renderer = new THREE.WebGLRenderer({
       canvas: canvas,
       physicallyCorrectLights: true,
@@ -179,44 +181,34 @@ class ParadoxChess {
     const aspect = 2; // the canvas default
     const near = 0.1;
     const far = 25;
-    window.camera = new THREE.PerspectiveCamera(fov, aspect, near, far);
-    window.raycaster = new THREE.Raycaster();
-    window.mouse = new THREE.Vector2();
-    window.cube_size = cube_size;
+    this.camera = new THREE.PerspectiveCamera(fov, aspect, near, far);
+    this.raycaster = new THREE.Raycaster();
+    this.mouse = new THREE.Vector2();
 
     switch (parseInt(cube_size)) {
       case 4:
-      case 41:
-      case 42:
       case 5:
         this.corrector = -2.5;
-        window.realCubeSize = 4;
+        this.realCubeSize = 4;
         break;
       case 6:
-      case 61:
-      case 62:
         this.corrector = -3.5;
-        window.realCubeSize = 6;
-        break;
-      case 8:
-        this.corrector = -4.5;
-        window.realCubeSize = 8;
+        this.realCubeSize = 6;
         break;
     }
 
-    window.controls = new OrbitControls(window.camera, canvas);
+    this.controls = new OrbitControls(this.camera, args.canvas);
 
-    window.controls.maxDistance = 13;
-    //window.controls.autoRotate=true;
-    window.controls.target.set(0, 0, 0);
-    window.controls.update();
+    this.controls.maxDistance = 13;
+    this.controls.target.set(0, 0, 0);
+    this.controls.update();
 
-    window.scene = new THREE.Scene();
-    window.scene.add(window.camera);
-    window.scene.background = new THREE.Color("black");
-    window.scene.position.set(0, 0, 0);
+    this.scene = new THREE.Scene();
+    this.scene.add(this.camera);
+    this.scene.background = new THREE.Color("black");
+    this.scene.position.set(0, 0, 0);
 
-    window.camera.lookAt(window.scene.position); // the origin
+    this.camera.lookAt(this.scene.position); // the origin
 
     this.addLight(-1, 2, 4);
     this.addLight(1, -1, -2);
@@ -227,7 +219,7 @@ class ParadoxChess {
 
     {
       var material = new THREE.LineBasicMaterial({
-        color: window.Game_UI.game_options.state.user_options.line_color,
+        color: args.lineColor,
         opacity: 0.2,
         transparent: true,
         linewidth: 1,
@@ -240,70 +232,63 @@ class ParadoxChess {
         delete world_expected[world[w]];
         this.dcube(world[w], material);
       }
-      //muar
-
-      if (cube_size == 61) {
-        for (let coord in world_expected) {
-          this.mark_white_space("black", coord);
-        }
-      }
     }
 
-    this.create_users(window.Game_UI.user_id, window.Game_UI.users);
+    this.create_users(args.userId, args.users);
     this.render();
     requestRenderIfNotRequested();
-    controls.addEventListener("change", requestRenderIfNotRequested);
+    this.controls.addEventListener("change", requestRenderIfNotRequested);
     window.addEventListener("resize", requestRenderIfNotRequested);
     window.addEventListener("click", onDocumentMouseDown, false);
 
     var el = document.getElementById("canvas");
     el.addEventListener(
       "touchstart",
-      function (event) {
-        window.touch_status = 1;
-        window.touch_position = event.touches[0];
+      (event) => {
+        this.touch_status = 1;
+        this.touch_position = event.touches[0];
       },
       false
     );
     el.addEventListener(
       "touchend",
-      function (event) {
-        window.touch_status = 0;
+      (event) => {
+        this.touch_status = 0;
 
-        if (window.touch_status != 2) onTouchDown(event);
+        if (this.touch_status != 2) onTouchDown(event);
       },
       false
     );
     el.addEventListener(
       "touchmove",
-      function () {
-        window.touch_status = 2;
+      () => {
+        this.touch_status = 2;
       },
       false
     );
   }
 
   debug(data) {
-    send2({ action: "debug", data: data });
+    this.send2({ action: "debug", data: data });
   }
 
   draw_map() {
-    var models = Game_UI.models;
+    var models = this.models;
     for (var id in models) {
       if (models[id].cube_number != 0) {
         this.load_figure(
           id,
           models[id].figure,
           models[id].cube_number,
-          Game_UI.user_color(models[id].uid),
+          this.getUserColor(models[id].uid),
           models[id].dir
         );
       }
     }
 
-    window.camera.position.set(0, 0, window.realCubeSize * 1.5);
+    this.camera.position.set(0, 0, this.realCubeSize * 1.5);
     //
-    window.camera.updateProjectionMatrix();
+    this.camera.updateProjectionMatrix();
   }
 
   recenterMap(world) {
@@ -320,8 +305,8 @@ class ParadoxChess {
       cameraPos[i] = d;
     }
 
-    window.camera.position.set(cameraPos[0], cameraPos[1], cameraPos[2]);
-    window.camera.updateProjectionMatrix();
+    this.camera.position.set(cameraPos[0], cameraPos[1], cameraPos[2]);
+    this.camera.updateProjectionMatrix();
   }
 
   mark_slave(color, cube_number) {
@@ -335,8 +320,8 @@ class ParadoxChess {
       side: THREE.DoubleSide,
     });
     const cube = new THREE.Mesh(new THREE.BoxGeometry(1, 1, 1), material);
-    //window.scene.add(cube);
-    window.scene.add(cube);
+    //this.scene.add(cube);
+    this.scene.add(cube);
     for (var i = 0; i < 3; i++) {
       coord[i] = Number(coord[i]) + this.corrector;
     }
@@ -344,30 +329,33 @@ class ParadoxChess {
     return cube;
   }
 
-  select_green_slave(data, cube_number, callback) {
-    this.clear_marked_cubes(); //deactivate all markers
-    window.Game_UI.game_menu.state.unselect_show = 1;
-    window.Game_UI.game_menu.setState(window.Game_UI.game_menu.state);
-    if (window.Game_UI.user_id == window.Game_UI.tour)
-      window.markers.push(this.mark("green", cube_number, 2));
-    else window.markers.push(this.mark_slave("green", cube_number));
+  select_green_slave(args) {
+    const cube_number = args.cube_number;
+    this.clearMarkedCubes(); //deactivate all markers
+    this.showUnselect();
+
+    if (this.userId == this.tour) {
+      this.markers.push(this.mark("green", cube_number, 2));
+    } else {
+      this.markers.push(this.mark_slave("green", cube_number));
+    }
     this.refresh();
 
-    if (typeof callback == "function") callback();
+    if (typeof args.callback == "function") {
+      args.callback();
+    }
   }
 
-  reload_figures(data) {
+  reload_figures(args) {
+    const data = args.data;
     for (var m in data.map.models) {
-      if (
-        data.map.models[m].cube_number != window.Game_UI.models[m].cube_number
-      ) {
-        window.grouo_dynamic.remove(window.Game_UI.models[m].model);
+      if (data.map.models[m].cube_number != this.models[m].cube_number) {
         if (data.map.models[m].cube_number != 0)
           this.load_figure(
             m,
             data.map.models[m].figure,
             data.map.models[m].cube_number,
-            window.Game_UI.user_color(data.map.models[m].uid),
+            this.getUserColor(data.map.models[m].uid),
             data.map.models[m].dir
           );
       }
@@ -375,23 +363,25 @@ class ParadoxChess {
     this.refresh();
   }
 
-  select_figure_and_mark(data, markers, callback) {
-    this.clear_marked_cubes();
+  select_figure_and_mark(args) {
+    const markers = args.markers;
+    const callback = args.callback;
+    this.clearMarkedCubes();
 
-    window.Game_UI.game_menu.state.unselect_show = 1;
-    window.Game_UI.game_menu.setState(window.Game_UI.game_menu.state);
+    this.showUnselect();
     for (var m in markers) {
-      if (markers[m].color == "blue")
-        window.active_cube = markers[m].cube_number;
-
-      if (window.Game_UI.tour == window.Game_UI.user_id)
-        window.markers.push(
+      if (markers[m].color == "blue") {
+        this.active_cube = markers[m].cube_number;
+      }
+      if (this.tour == this.userId) {
+        this.markers.push(
           this.mark(markers[m].color, markers[m].cube_number, markers[m].flag)
         );
-      else
-        window.markers.push(
+      } else {
+        this.markers.push(
           this.mark_slave(markers[m].color, markers[m].cube_number)
         );
+      }
     }
 
     this.refresh();
@@ -399,16 +389,20 @@ class ParadoxChess {
   }
 
   getModel(it, what) {
-    for (var m in window.Game_UI.models) {
-      if (what == "cube" && it == window.Game_UI.models[m].cube_number)
-        return window.Game_UI.models[m];
-      if (what == "id" && it == window.Game_UI.models[m].id)
-        return window.Game_UI.models[m];
+    const models = this.models;
+    for (var m in models) {
+      if (what == "cube" && it == models[m].cube_number) {
+        return models[m];
+      }
+      if (what == "id" && it == models[m].id) {
+        return models[m];
+      }
     }
     return null;
   }
 
-  move_figure(data) {
+  move_figure(args) {
+    const data = args.data;
     var from_model = this.getModel(data.active_model, "id");
     if (from_model == null) return;
     var to_model = this.getModel(data.kill_model, "id");
@@ -416,13 +410,12 @@ class ParadoxChess {
     this.write_to_log({
       from_uid: from_model.uid,
       from_figure: from_model.figure,
-      from_color: window.Game_UI.user_color(from_model.uid),
+      from_color: this.getUserColor(from_model.uid),
       from: data.from,
       to: data.to,
       to_uid: to_model != null ? to_model.uid : null,
       to_figure: to_model != null ? to_model.figure : null,
-      to_color:
-        to_model != null ? window.Game_UI.user_color(to_model.uid) : null,
+      to_color: to_model != null ? this.getUserColor(to_model.uid) : null,
     });
     this.animate_move(from_model, to_model, {
       from: data.from.split(":"),
@@ -454,8 +447,8 @@ class ParadoxChess {
     return (Math.random() > 0.5 ? -1 : 1) * num;
   }
 
-  flyCube(cube) {
-    if (typeof window.flyIntVal == "undefined") window.flyIntVal = [];
+  flyCube(args) {
+    const cube = args.cube;
     for (let c in this.linesByCube[cube]) {
       let line = this.linesByCube[cube][c];
       let track = new THREE.VectorKeyframeTrack(
@@ -505,14 +498,14 @@ class ParadoxChess {
       );
 
       this.animateSingular(line, [track, quaternionKF], 45, (line) => {
-        window.scene.remove(line);
+        this.scene.remove(line);
       });
     }
   }
 
   addLine(cube, line) {
     this.linesByCube[cube].push(line);
-    window.scene.add(line);
+    this.scene.add(line);
   }
 
   dcube(cube, material) {
@@ -521,10 +514,9 @@ class ParadoxChess {
     var y = parseInt(arg[1]);
     var z = parseInt(arg[2]);
 
-    if (window.cubes == undefined) window.cubes = [];
-    if (typeof this.linesByCube[cube] == "undefined")
+    if (typeof this.linesByCube[cube] == "undefined") {
       this.linesByCube[cube] = [];
-    //new
+    }
 
     this.addLine(cube, this.draw_line(material, x, y, z, x + 1, y, z));
     this.addLine(cube, this.draw_line(material, x, y, z, x, y + 1, z));
@@ -577,8 +569,8 @@ class ParadoxChess {
           if (o.isMesh) {
             o.material.color = color;
             o.material.opacity = 0.4;
-            o.callback = function () {
-              window.GAME.figure_clicked(this.cube_id, this.cube_number); //send to normal UI
+            o.callback = () => {
+              this.figure_clicked(o.cube_id, o.cube_number); //send to normal UI
             };
             o.cube_number = cube_number;
             o.cube_id = id;
@@ -599,8 +591,8 @@ class ParadoxChess {
         cube.position.set(coord[0], coord[1], coord[2]);
         cube.rotation.set(rotation[0], rotation[1], rotation[2]);
 
-        window.scene.add(cube);
-        window.Game_UI.models[id].model = cube;
+        this.scene.add(cube);
+        this.models[id].model = cube;
 
         this.refresh();
       },
@@ -622,10 +614,10 @@ class ParadoxChess {
     mesh.userData.clock = new THREE.Clock();
     mesh.end_callback = end_callback;
 
-    window.animationsObjects.push(mesh);
+    this.animationsObjects.push(mesh);
 
-    if (typeof window.animateMainOnce == "undefined") {
-      window.animateMainOnce = true;
+    if (typeof this.animateMainOnce == "undefined") {
+      this.animateMainOnce = true;
       animateMain();
     }
   }
@@ -675,12 +667,11 @@ class ParadoxChess {
     );
 
     this.animateSingular(mesh, [track, quaternionKF], 1000, () => {
-      window.scene.remove(to_model.model);
+      this.scene.remove(to_model.model);
     });
   }
 
   animate_move(from_model, to_model, args) {
-    window.animation_run = true;
     var from = args.from;
     var to = args.to;
 
@@ -708,7 +699,7 @@ class ParadoxChess {
           o.cube_number = data.to.join(":");
         }
       });
-      this.clear_marked_cubes();
+      this.clearMarkedCubes();
       this.switchTourHandle();
       if (typeof data.to_model != "undefined" && data.to_model != null) {
         this.attack(data.to_model);
@@ -716,11 +707,25 @@ class ParadoxChess {
     });
   }
 
-  clear_marked_cubes(callback) {
-    window.Game_UI.game_menu.state.unselect_show = 0;
-    window.Game_UI.game_menu.setState(window.Game_UI.game_menu.state);
+  showUnselect() {
+    this.send2ui({
+      name: "game_menu",
+      method: "updateUnselectShow",
+      value: 1,
+    });
+  }
+  hideUnselect() {
+    this.send2ui({
+      name: "game_menu",
+      method: "updateUnselectShow",
+      value: 0,
+    });
+  }
 
-    for (let m in window.markers) window.scene.remove(window.markers[m]);
+  clearMarkedCubes(callback) {
+    this.hideUnselect();
+
+    for (let m in this.markers) this.scene.remove(this.markers[m]);
 
     this.refresh();
     if (typeof callback == "function") callback();
@@ -728,19 +733,19 @@ class ParadoxChess {
 
   refresh() {
     if (typeof window.renderer != "undefined") {
-      window.renderer.render(window.scene, window.camera);
-    } else window.camera.updateProjectionMatrix();
+      window.renderer.render(this.scene, this.camera);
+    } else this.camera.updateProjectionMatrix();
   }
 
   render() {
     var renderRequested = undefined;
     if (resizeRendererToDisplaySize(renderer)) {
       const canvas = renderer.domElement;
-      window.camera.aspect = canvas.clientWidth / canvas.clientHeight;
-      window.camera.updateProjectionMatrix();
+      this.camera.aspect = canvas.clientWidth / canvas.clientHeight;
+      this.camera.updateProjectionMatrix();
     }
 
-    window.renderer.render(window.scene, window.camera);
+    window.renderer.render(GAME.scene, GAME.camera);
   }
 
   addLight(...pos) {
@@ -748,37 +753,51 @@ class ParadoxChess {
     const intensity = 0.6;
     const light = new THREE.DirectionalLight(color, intensity);
     light.position.set(...pos);
-    if (window.lights == undefined) window.lights = [];
-    window.lights.push(light);
-    window.camera.add(light);
+    if (this.lights == undefined) this.lights = [];
+    this.lights.push(light);
+    this.camera.add(light);
   }
 
   //////MAIN FUNC
 
+  send2(data) {
+    document.dispatchEvent(
+      new CustomEvent("send2", {
+        detail: data,
+        bubbles: true,
+        cancelable: false,
+      })
+    );
+  }
+
+  send2ui(data) {
+    document.dispatchEvent(
+      new CustomEvent("send2ui", {
+        detail: data,
+        bubbles: true,
+        cancelable: false,
+      })
+    );
+  }
+
   /////////UI?////////////
   select_figure(cube_id) {
-    var models = window.Game_UI.models;
+    var models = this.models;
 
-    if (window.Game_UI.user_id != window.Game_UI.tour) {
+    if (this.userId != this.tour) {
       console.log("Wait your tour");
       return;
     }
 
     if (
       typeof models[cube_id] != "undefined" &&
-      models[cube_id].uid == window.Game_UI.user_id
+      models[cube_id].uid == this.userId
     ) {
-      window.Game_UI.game_menu.state.unselect_show = 1;
-      window.Game_UI.game_menu.setState(window.Game_UI.game_menu.state);
+      this.showUnselect();
 
-      send2({ action: "select_figure", model_id: cube_id });
+      this.send2({ action: "select_figure", model_id: cube_id });
     } else {
-      console.log(
-        "not found in map",
-        cube_id,
-        models[cube_id],
-        window.Game_UI.user_id
-      );
+      console.log("not found in map", cube_id, models[cube_id], this.userId);
     }
   }
   mark_white_space(color, cube_number) {
@@ -791,7 +810,7 @@ class ParadoxChess {
       side: THREE.DoubleSide,
     });
     const cube = new THREE.Mesh(new THREE.BoxGeometry(1, 1, 1), material);
-    window.scene.add(cube);
+    this.scene.add(cube);
     let coord = cube_number.split(":");
     for (let c in coord) {
       coord[c] = Number(coord[c]) + this.corrector;
@@ -799,14 +818,17 @@ class ParadoxChess {
     cube.position.set(coord[0], coord[1], coord[2]);
     return cube;
   }
-  callbackSelectGreen(cube_number) {
-    this.clear_marked_cubes(); //deactivate all markers
-    send2({ action: "select_green", cube_number: cube_number });
-    window.Game_UI.WaitingClock.setState({ show: 0 });
 
-    window.Game_UI.game_menu.state.unselect_show = 1;
-    window.Game_UI.game_menu.setState(window.Game_UI.game_menu.state);
+  callbackSelectGreen(cube_number) {
+    this.clearMarkedCubes(); //deactivate all markers
+    this.send2({ action: "select_green", cube_number: cube_number });
+    this.send2ui({
+      name: "WaitingClock",
+      method: "hide",
+    });
+    this.showUnselect();
   }
+
   mark(color, cube_number, flag) {
     color = new THREE.Color(color);
     const material = new THREE.MeshBasicMaterial({
@@ -822,17 +844,17 @@ class ParadoxChess {
     //selected yellow sector - sector start be green
 
     if (flag == 1) {
-      cube.callback = function () {
-        window.GAME.callbackSelectGreen(this.cube_number);
+      cube.callback = (a) => {
+        this.callbackSelectGreen(a.cube_number);
       };
     }
     //clicked green sector - action start
     if (flag == 2)
-      cube.callback = function () {
-        send2({ action: "move", action_cube: this.cube_number });
+      cube.callback = (a) => {
+        this.send2({ action: "move", action_cube: a.cube_number });
       };
-    //window.scene.add(cube);
-    window.scene.add(cube);
+    //this.scene.add(cube);
+    this.scene.add(cube);
     var coord = cube_number.split(":");
 
     for (var i = 0; i < 3; i++) {
@@ -841,20 +863,20 @@ class ParadoxChess {
     cube.position.set(coord[0], coord[1], coord[2]);
 
     if (color == "blue") {
-      window.object_light = new THREE.PointLight(0xffffff, 3, 3, 3, 2);
-      window.object_light.matrixAutoUpdate = true;
-      window.scene.add(window.object_light);
-      window.object_light.position.set(
-        coord[0] - 2,
-        coord[1] - 2,
-        coord[2] - 2
-      );
+      this.object_light = new THREE.PointLight(0xffffff, 3, 3, 3, 2);
+      this.object_light.matrixAutoUpdate = true;
+      this.scene.add(this.object_light);
+      this.object_light.position.set(coord[0] - 2, coord[1] - 2, coord[2] - 2);
     }
     return cube;
   }
 
   write_to_log(args) {
-    window.Game_UI.Log.add(args);
+    this.send2ui({
+      name: "Log",
+      method: "add",
+      value: args,
+    });
   }
 
   figure_clicked(cube_id, cube_number) {
@@ -864,14 +886,16 @@ class ParadoxChess {
     }
   }
 
-  draw_info(message, color) {
+  draw_info(args) {
+    const message = args.message;
+    const color = args.color;
     if (typeof message == "undefined") return null;
     if (message.length == 0) return null;
 
     if (typeof this.info != "undefined") {
       if (this.info.myMessage == message) return null;
       else {
-        window.camera.remove(this.info);
+        this.camera.remove(this.info);
         delete this.info;
       }
     }
@@ -880,7 +904,7 @@ class ParadoxChess {
     this.info.myMessage = this.info;
     this.lastMessage = this.info;
 
-    window.camera.add(this.info);
+    this.camera.add(this.info);
     this.startPosition = [14.5, -3, -4];
     this.endPosition = [-3, -3, -4];
     let track = new THREE.VectorKeyframeTrack(
@@ -898,7 +922,7 @@ class ParadoxChess {
     this.animateSingular(this.info, [track], 3, (info) => {
       setTimeout(
         (info) => {
-          window.camera.remove(info);
+          this.camera.remove(info);
           this.refresh();
         },
         15000,
@@ -911,7 +935,7 @@ class ParadoxChess {
   get_text(message, height, width, color, opacity) {
     var color = color != undefined ? new THREE.Color(color) : 0x006699;
     let xMid;
-    let shapes = window.font.generateShapes(message, height, width);
+    let shapes = this.font.generateShapes(message, height, width);
     let geometry = new THREE.ShapeGeometry(shapes);
     geometry.computeBoundingBox();
     let material = new THREE.MeshBasicMaterial({
@@ -944,7 +968,7 @@ class ParadoxChess {
   }
 
   userCor(showUsersCount) {
-    var y = window.realCubeSize;
+    var y = this.realCubeSize;
 
     switch (showUsersCount) {
       case 1:
@@ -968,19 +992,19 @@ class ParadoxChess {
     return cor;
   }
   switchTourHandle() {
-    if (typeof window.avatar != "undefined") {
-      for (var uid in window.avatar) {
-        var actualOpacity =
-          window.Game_UI.tour.toString() == uid.toString() ? 0.8 : 0.2;
-        if (window.avatar[uid].material.opacity != actualOpacity) {
-          window.avatar[uid].material.opacity = actualOpacity;
+    if (typeof this.avatar != "undefined") {
+      for (var uid in this.avatar) {
+        var actualOpacity = this.tour.toString() == uid.toString() ? 0.8 : 0.2;
+        if (this.avatar[uid].material.opacity != actualOpacity) {
+          this.avatar[uid].material.opacity = actualOpacity;
         }
       }
       this.refresh();
-      if (window.Game_UI.tour.toString() == window.Game_UI.user_id) {
-        //GAME.info_tour = GAME.draw_info(window.Game_UI.lang._is_your_tour, Game_UI.user_color(window.Game_UI.tour));
-      } else if (typeof this.info_tour != "undefined") {
-        window.camera.remove(this.info_tour);
+      if (
+        this.tour.toString() != this.userId.toString() &&
+        typeof this.info_tour != "undefined"
+      ) {
+        this.camera.remove(this.info_tour);
         this.refresh();
         delete this.info_tour;
       }
@@ -988,62 +1012,109 @@ class ParadoxChess {
   }
 
   //draw avatars
-  create_users(user_id, users) {
+  create_users(userId, users) {
     //z = -3;
     var cor = this.userCor(Object.keys(users).length - 1);
 
     var i = 0;
-    window.avatar = {};
+    this.avatar = {};
     for (var uid in users) {
-      if (user_id != uid) {
-        window.avatar[uid] = this.get_image(
+      if (userId != uid) {
+        this.avatar[uid] = this.get_image(
           "/images/ghost.png",
           4,
           7,
-          window.Game_UI.user_color(uid),
-          window.Game_UI.tour == uid ? 0.8 : 0.2
+          this.getUserColor(uid),
+          this.tour == uid ? 0.8 : 0.2
         );
-        window.avatar[uid].position.set(cor[i].x, cor[i].y, cor[i].z);
-        window.camera.add(window.avatar[uid]);
+        this.avatar[uid].position.set(cor[i].x, cor[i].y, cor[i].z);
+        this.camera.add(this.avatar[uid]);
 
         i++;
       }
     }
   }
 
-  finish_game(message, world) {
+  finish_game(args) {
     //GAME.draw_info(message);
-
+    const message = args.message;
+    const world = args.world;
     this.fixed_texts = [this.get_text(message, 0.5, 0.5, "#FFFFFF", 1)];
-    window.camera.add(this.fixed_texts[0]);
+    this.camera.add(this.fixed_texts[0]);
     this.fixed_texts[0].position.set(-2, 1, -2);
 
     setTimeout(() => {
       for (let w in world) {
-        this.flyCube(world[w]);
+        this.flyCube({ cube: world[w] });
       }
     }, 2000);
     setTimeout(() => {
-      for (let li in window.lights) {
-        window.lights[li].intensity -= 0.005;
+      for (let li in this.lights) {
+        this.lights[li].intensity -= 0.005;
         this.refresh();
-        if (window.lights[li].intensity < 0) {
+        if (this.lights[li].intensity < 0) {
           last_time = true;
         }
       }
     }, 4000);
     setTimeout(() => {
-      for (let li in window.lights) {
-        window.camera.remove(window.lights[li]);
+      for (let li in this.lights) {
+        this.camera.remove(this.lights[li]);
       }
-      for (let id in window.Game_UI.models)
-        window.scene.remove(window.Game_UI.models[id].model);
+      for (let id in this.models) this.scene.remove(this.models[id].model);
       this.refresh();
-      for (let a in window.avatar) {
-        window.camera.remove(window.avatar[a]);
+      for (let a in this.avatar) {
+        this.camera.remove(this.avatar[a]);
       }
       this.refresh();
     }, 10000);
+  }
+
+  getUserOptions() {
+    if (this.userOptions != null) {
+      return this.userOptions;
+    }
+    const userOptions = localStorage.getItem("user_options");
+    this.defaultPlayersColors = ["#7F00FF", "#00FF55", "#FF552A", "#557FFF"];
+
+    if (userOptions == null) {
+      this.userOptions = {
+        theme: "0",
+        nosound: false,
+        vr: false,
+        colors: this.defaultPlayersColors,
+        line_color: "#0000FF",
+      };
+      localStorage.setItem("user_options", JSON.stringify(this.userOptions));
+    } else {
+      this.userOptions = JSON.parse(userOptions);
+    }
+    return this.userOptions;
+  }
+
+  setUserOptions(userOptions) {
+    this.userOptions = userOptions;
+    localStorage.setItem("user_options", JSON.stringify(this.userOptions));
+  }
+
+  getUserColor(uid) {
+    return this.userOptions.colors[
+      Object.keys(this.users).indexOf(uid.toString())
+    ];
+  }
+
+  setUserId(uid) {
+    this.userId = uid;
+  }
+  getUserId() {
+    return this.userId;
+  }
+
+  setTour(uid) {
+    this.tour = uid;
+  }
+  getTour() {
+    return this.tour;
   }
 }
 

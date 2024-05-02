@@ -60,6 +60,7 @@ module.exports = {
   game_select_green: function (data) {
     game = this.glob.tools.getActiveGame(data.user_id);
     if (game == false) return false;
+    console.log("xxxx", data);
     message = data.message;
     this.glob.the_users.sendToGameClients(game, {
       action: "select_green",

@@ -26,16 +26,6 @@ module.exports = {
       .update(this.generateNewId().toString())
       .digest("hex");
   },
-  /*
-  get_usersConnected: function (page) {
-    var user_sorted = {};
-    for (var u in this.usersConnected) {
-      if (typeof this.usersConnected[u].socket != "undefined") {
-        user_sorted[u] = this.usersConnected[u];
-      }
-    }
-    return user_sorted;
-  },*/
 
   initSession: function (cookie, page, ip) {
     if (typeof this.user_keys[cookie] == "undefined") {
@@ -54,25 +44,7 @@ module.exports = {
 
     return user_id;
   },
-  /*
-  send_2_remind_client: function (user_id, extra) {
-    tools = this.tools;
-    the_users = this;
-    if (
-      typeof the_users.usersConnected[user_id] != "undefined" &&
-      typeof the_users.usersConnected[user_id].socket != "undefined"
-    ) {
-      the_users.usersConnected[user_id].socket.send(JSON.stringify(extra));
-    }
-  },
 
-  send_2_scores_client: function (user_id, extra) {
-    tools = this.tools;
-    the_users = this;
-    if (typeof the_users.usersConnected[user_id].socket != "undefined")
-      the_users.usersConnected[user_id].socket.send(JSON.stringify(extra));
-  },
-*/
   sendToStartClient: function (user_id, extra) {
     tools = this.tools;
     the_users = this;

@@ -128,7 +128,7 @@ var lang = {
   the_winner: "The winner:",
   _is_mat2figure: "You are lose, because only 2 figures left.",
   _is_mat: "You are  checkmated! ",
-  _is_shah: "Check on you !",
+  _is_shah: "Check on you",
   _is_draw: "Draw",
   _is_offer_draw: "Offer draw",
   _is_your_tour: "Your tour.",
