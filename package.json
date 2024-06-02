@@ -3,8 +3,8 @@
   "version": "1.0.0",
   "description": "",
   "main": "index.js",
-    "scripts": {
-    "start":"node index.js",	
+  "scripts": {
+    "start": "node index.js",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "author": "Roman Shneer",
@@ -16,9 +16,7 @@
     "express-session": "^1.17.0",
     "react": "^18.2.0",
     "react-dom": "^18.2.0",
-    "request": "^2.88.2",
     "socket.io": "^4.5.1",
-    "striptags": "^3.1.1",
     "three": "^0.162.0",
     "ws": "^8.16.0"
   },
