@@ -1,14 +1,14 @@
-var express = require("express");
+const express = require("express");
 const session = require("express-session");
 const http = require("http");
 const path = require("path");
 const { Server } = require("socket.io");
 
-var bodyParser = require("body-parser");
-var app = express();
 
-app.use(bodyParser.urlencoded({ extended: false }));
-app.use(bodyParser.json());
+const app = express();
+
+app.use(express.json());
+app.use(express.urlencoded({ extended: true }));
 app.set("view engine", "ejs");
 app.engine("html", require("ejs").renderFile);
 app.use(express.static("public"));
@@ -27,11 +27,15 @@ app.use(
   "/jsm/",
   express.static(path.join(__dirname, "node_modules/three/examples/jsm"))
 );
+
+app.use('/react/', express.static('node_modules/react/umd'));
+app.use('/react-dom/', express.static('node_modules/react-dom/umd'));
+/*
 app.use("/react/", express.static(path.join(__dirname, "node_modules/react")));
 app.use(
   "/react-dom/",
   express.static(path.join(__dirname, "node_modules/react-dom"))
-);
+);*/
 app.use(
   session({
     secret: "samhara",
@@ -47,6 +51,8 @@ app.use(
 );
 const config = require("./includes/config.js");
 const PORT = process.env.PORT || config.web_port;
+
+
 app.all("/", function (req, res) {
   res.render("index.html", { PORT: PORT, socket_host: config.socket_host });
 });
